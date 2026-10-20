@@ -1,6 +1,7 @@
 # NADITOWN — Adaptive Township Emergency Operating System
+
 > **Sime Darby Property University Hackathon 2026**  
-> **Tema:** *People and Planet*  
+> **Tema:** _People and Planet_  
 > **Kategori:** Smart Township / Emergency Coordination / Sustainability  
 > **Lokasi Prototaip:** Bandar Elmina (City of Elmina), Shah Alam, Selangor
 
@@ -8,34 +9,36 @@
 
 ## 👥 Agihan Tugasan Prototaip Pasukan
 
-| Ahli | Nama | Tanggungjawab Prototaip | Status |
-| :--- | :--- | :--- | :--- |
-| **Ahli 1** | **Salman (Anda)** | **Peta Utama & User Interface (UI)** | **Selesai (Siap Sepenuhnya)** |
-| **Ahli 2** | **Ana** | Paparan Dashboard (Status Fasiliti & Senarai Sumber) | *Slot Modular Sedia (`src/store.js` & `pane-dashboard`)* |
-| **Ahli 3** | **Aufa** | Butang Kawalan Simulasi (Tutup Jalan / Kenaikan Air) | *Slot Modular Sedia (`pane-simulation` & State trigger)* |
-| **Ahli 4** | *-* | Backend & Logik Laluan (Routing Algorithm A* / Dijkstra) | *Slot Modular Sedia (`pane-routing` & Map polyline)* |
-| **Ahli 5** | **Piqa** | Masukkan Data (20-50 bangunan/jalan) & Testing Sistem | *Slot Modular Sedia (`src/data.js` & `pane-data-test`)* |
+| Ahli       | Nama       | Tanggungjawab Prototaip                                   | Status                                                   |
+| :--------- | :--------- | :-------------------------------------------------------- | :------------------------------------------------------- |
+| **Ahli 1** | **Salman** | **Peta Utama & User Interface (UI)**                      | **Selesai (Siap Sepenuhnya)**                            |
+| **Ahli 2** | **Ana**    | Paparan Dashboard (Status Fasiliti & Senarai Sumber)      | _Slot Modular Sedia (`src/store.js` & `pane-dashboard`)_ |
+| **Ahli 3** | **Aufa**   | Butang Kawalan Simulasi (Tutup Jalan / Kenaikan Air)      | _Slot Modular Sedia (`pane-simulation` & State trigger)_ |
+| **Ahli 4** | **Izzat**  | Backend & Logik Laluan (Routing Algorithm A\* / Dijkstra) | _Slot Modular Sedia (`pane-routing` & Map polyline)_     |
+| **Ahli 5** | **Piqa**   | Masukkan Data (20-50 bangunan/jalan) & Testing Sistem     | _Slot Modular Sedia (`src/data.js` & `pane-data-test`)_  |
 
 ---
 
 ## 🚀 Ciri-Ciri Utama Yang Telah Dibina (Bahagian Salman)
 
 ### 1. Peta Utama Geografikal (Interactive GIS Engine - Leaflet.js)
+
 - **Koordinat Pusat:** Bandar Elmina, Shah Alam (`[3.1835, 101.5080]`).
 - **Pelbagai Gaya Peta (Map Styles):**
   - **Tactical Dark Mode (Default):** Paparan pusat kawalan kecemasan berprofil tinggi (CartoDB Dark Matter).
   - **Peta Jalan (Day/Detail):** CartoDB Voyager.
   - **Satelit:** Esri World Imagery resolusi tinggi.
 - **Lapisan Poligon Zon Banjir:** Zon Merah (Limpahan Sungai Buloh), Zon Jingga (Tasik Elmina), dan Zon Kuning (Denai Alam) dengan ketelusan (opacity) dan tooltip taktikal.
-- **Rangkaian Jalan & Status Sekatan:** Polylines jalan raya berkod warna (*Hijau: Boleh Dilalui*, *Kuning: Air Bertakung*, *Merah: Jalan Terputus*).
+- **Rangkaian Jalan & Status Sekatan:** Polylines jalan raya berkod warna (_Hijau: Boleh Dilalui_, _Kuning: Air Bertakung_, _Merah: Jalan Terputus_).
 - **Marker Khusus Beranimasi (Custom SVG DivIcons):**
   - 🏠 Pusat Pemindahan Sementara (PPS) dengan indikator muatan & kapasiti dihuni.
   - 🏥 Fasiliti Kesihatan / Hospital & Pusat Triage.
   - 🚒 Balai Bomba, Penyelamat (JBPM), PKOB & Depot Logistik Sime Darby.
-  - 📡 Telemetri Sensor Paras Air IoT dengan *pulse ring* amaran dan tolok bacaan masa nyata.
+  - 📡 Telemetri Sensor Paras Air IoT dengan _pulse ring_ amaran dan tolok bacaan masa nyata.
 - **Pop-up Kaca Taktikal (Glassmorphism Popups):** Memaparkan maklumat fasiliti, bar peratusan kapasiti, nama pegawai dihubungi, dan butang tindakan pantas.
 
 ### 2. Antaramuka Pengguna (UI Command Center Architecture)
+
 - **Top Command Header:**
   - Penjenamaan rasmi NADITOWN + Sime Darby Property University Hackathon 2026.
   - Penunjuk Tahap Kecemasan Dinamik (`KOD KUNING`, `KOD JINGGA`, `KOD MERAH`).
