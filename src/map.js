@@ -41,24 +41,23 @@ export class TownshipMap {
     });
 
     // 2. Definisi Base Tile Layers
-    this.baseLayers.dark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://carto.com/">CARTO</a> | OpenStreetMap contributors',
-      subdomains: 'abcd',
-      maxZoom: 19
+    this.baseLayers.dark = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+      attribution: '&copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+      maxZoom: 16
     });
 
     this.baseLayers.street = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://carto.com/">CARTO</a> | OpenStreetMap contributors',
+      attribution: '&copy; CARTO &copy; OpenStreetMap contributors',
       subdomains: 'abcd',
       maxZoom: 19
     });
 
     this.baseLayers.satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP',
       maxZoom: 18
     });
 
-    // Pasang default tile layer (Dark Command Center mode)
+    // Pasang default tile layer
     this.baseLayers.dark.addTo(this.map);
 
     // 3. Masukkan kesemua Layer Groups ke dalam peta
@@ -138,11 +137,11 @@ export class TownshipMap {
     ];
 
     L.polygon(boundaryCoords, {
-      color: '#00f2fe',
+      color: '#3b82f6',
       weight: 2,
-      dashArray: '6, 8',
-      fillColor: '#00f2fe',
-      fillOpacity: 0.03,
+      dashArray: '5, 5',
+      fillColor: '#3b82f6',
+      fillOpacity: 0.04,
       interactive: false
     }).addTo(this.map);
   }
@@ -466,21 +465,12 @@ export class TownshipMap {
 
     if (!latLngPoints || latLngPoints.length === 0) return;
 
-    // Garisan glow luar
-    L.polyline(latLngPoints, {
-      color: isAlternative ? '#00e5ff' : '#00e676',
-      weight: 10,
-      opacity: 0.35,
-      lineCap: 'round',
-      lineJoin: 'round'
-    }).addTo(this.layerGroups.route);
-
-    // Garisan utama beranimasi
+    // Garisan utama laluan
     const routeLine = L.polyline(latLngPoints, {
-      color: isAlternative ? '#00f2fe' : '#69f0ae',
+      color: isAlternative ? '#2563eb' : '#059669',
       weight: 5,
       opacity: 0.95,
-      dashArray: '12, 10',
+      dashArray: '8, 8',
       className: 'animated-route-flow',
       lineCap: 'round',
       lineJoin: 'round'
