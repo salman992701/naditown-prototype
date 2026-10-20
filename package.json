@@ -1,0 +1,23 @@
+{
+  "name": "naditown-prototype",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/salman992701/naditown-prototype/issues"
+  },
+  "homepage": "https://github.com/salman992701/naditown-prototype#readme",
+  "devDependencies": {
+    "vite": "^8.3.4"
+  },
+  "dependencies": {
+    "leaflet": "^1.9.4",
+    "lucide": "^1.59.0"
+  }
+}

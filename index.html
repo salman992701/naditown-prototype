@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NADITOWN | Adaptive Township Emergency Operating System</title>
+  
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="/src/styles.css">
+</head>
+<body>
+  <div id="app-container">
+    
+    <!-- 1. TOP COMMAND HEADER -->
+    <header class="header-bar">
+      <div class="brand-section">
+        <div class="brand-logo-badge">
+          <div class="logo-pulse-icon">N</div>
+          <div class="brand-titles">
+            <h1>NADITOWN</h1>
+            <span class="brand-subtitle">Adaptive Township Emergency OS</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-center-info">
+        <div class="township-badge" title="Pusat Operasi Perbandaran Pintar">
+          <span class="icon">📍</span>
+          <span>Bandar Elmina, Shah Alam</span>
+          <span class="section-author-badge">Sime Darby Property</span>
+        </div>
+
+        <div id="emergency-pill" class="emergency-code-pill yellow">
+          <span class="status-ping"></span>
+          <span id="emergency-pill-text">TAHAP: KOD KUNING (WASPADA)</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="live-clock" id="live-clock">00:00:00 MYT</div>
+        <button class="btn-hackathon-info" id="btn-open-team-modal">
+          <span>👥</span>
+          <span>Struktur Pasukan</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- 2. MAIN WORKSPACE (MAP + DOCKABLE SIDEBAR) -->
+    <main class="main-content" id="main-content">
+      
+      <!-- LEAFLET MAP VIEWPORT (Ahli 1: Salman Core) -->
+      <section id="map-viewport">
+        
+        <!-- Floating Search & Filter -->
+        <div class="map-floating-bar">
+          <div class="floating-search-box">
+            <span style="color: var(--accent-cyan); font-size: 0.9rem;">🔍</span>
+            <input type="text" id="map-search-input" placeholder="Cari fasiliti, jalan, atau sensor..." />
+          </div>
+        </div>
+
+        <!-- Floating Quick Tools -->
+        <div class="map-tools-floating">
+          <button class="btn-map-control" id="btn-zoom-in" title="Zum Masuk">➕</button>
+          <button class="btn-map-control" id="btn-zoom-out" title="Zum Keluar">➖</button>
+          <button class="btn-map-control" id="btn-recenter" title="Fokus Semula Bandar Elmina">🎯</button>
+          <button class="btn-map-control" id="btn-toggle-legend" title="Buka/Tutup Petunjuk">🗺️</button>
+        </div>
+
+        <!-- Map Style Switcher (Dark / Streets / Satellite) -->
+        <div class="map-style-selector">
+          <button class="btn-style-pill active" data-style="dark">Tactical Dark</button>
+          <button class="btn-style-pill" data-style="street">Peta Jalan</button>
+          <button class="btn-style-pill" data-style="satellite">Satelit Esri</button>
+        </div>
+
+        <!-- Map Legend Overlay -->
+        <div class="map-legend-box" id="map-legend">
+          <div class="legend-header">
+            <span>Petunjuk Operasi</span>
+            <span style="color: var(--accent-cyan); font-size: 0.7rem;">LIVE</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background: #29b6f6;"></div>
+            <span>Pusat Pemindahan (PPS)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background: #ff5252;"></div>
+            <span>Fasiliti Kesihatan & Triage</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background: #ff7043;"></div>
+            <span>Pos Balai Bomba / Penyelamat</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background: #7c4dff;"></div>
+            <span>Pusat Kawalan PKOB</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-line" style="background: #00e676;"></div>
+            <span>Laluan Boleh Dilalui (Hijau)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-line" style="background: #ff1744;"></div>
+            <span>Laluan Terputus / Ditutup (Merah)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background: #ff3838; opacity: 0.5;"></div>
+            <span>Zon Banjir Kritikal</span>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- 3. COMMAND SIDEBAR (Ahli 1 Layout + Slots for Ahli 2, 3, 4, 5) -->
+      <aside class="command-sidebar" id="command-sidebar">
+        
+        <!-- Toggle button to collapse/expand sidebar -->
+        <button class="sidebar-collapse-toggle" id="sidebar-toggle" title="Sembunyi/Papar Panel">
+          <span id="sidebar-toggle-arrow">◀</span>
+        </button>
+
+        <!-- Sidebar Tab Headers -->
+        <nav class="sidebar-tabs-bar">
+          <button class="tab-btn active" data-tab="map-nav">
+            <span>🗺️</span>
+            <span>Peta</span>
+            <span class="tab-badge">Ahli 1</span>
+          </button>
+          <button class="tab-btn" data-tab="dashboard">
+            <span>📊</span>
+            <span>Dashboard</span>
+            <span class="tab-badge">Ahli 2</span>
+          </button>
+          <button class="tab-btn" data-tab="simulation">
+            <span>🎮</span>
+            <span>Simulasi</span>
+            <span class="tab-badge">Ahli 3</span>
+          </button>
+          <button class="tab-btn" data-tab="routing">
+            <span>🧭</span>
+            <span>Laluan</span>
+            <span class="tab-badge">Ahli 4</span>
+          </button>
+          <button class="tab-btn" data-tab="data-test">
+            <span>📁</span>
+            <span>Data</span>
+            <span class="tab-badge">Ahli 5</span>
+          </button>
+        </nav>
+
+        <!-- Sidebar Tab Panels -->
+        <div class="sidebar-tab-content">
+          
+          <!-- TAB 1: KAWALAN LAPISAN PETA & BANDAR (Ahli 1: Salman) -->
+          <div class="tab-pane active" id="pane-map-nav">
+            <div class="panel-section-title">
+              <span>Lapisan Geografikal (GIS)</span>
+              <span class="section-author-badge">Ahli 1: Salman</span>
+            </div>
+
+            <!-- Layer Toggles -->
+            <div class="layer-toggle-card">
+              <div class="layer-info">
+                <div class="layer-icon-box" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">🌊</div>
+                <div>
+                  <div class="layer-title-text">Zon Risiko Banjir</div>
+                  <div class="layer-desc-text">Poligon kawasan berisiko & limpahan sungai</div>
+                </div>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="layer-flood" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="layer-toggle-card">
+              <div class="layer-info">
+                <div class="layer-icon-box" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">🏠</div>
+                <div>
+                  <div class="layer-title-text">Pusat Pemindahan (PPS)</div>
+                  <div class="layer-desc-text">Dewan komuniti & sekolah berdaftar JKM</div>
+                </div>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="layer-pps" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="layer-toggle-card">
+              <div class="layer-info">
+                <div class="layer-icon-box" style="background: rgba(248, 113, 113, 0.15); color: #f87171;">🏥</div>
+                <div>
+                  <div class="layer-title-text">Fasiliti Kesihatan & Hospital</div>
+                  <div class="layer-desc-text">Pusat triage & ambulans kecemasan</div>
+                </div>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="layer-medical" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="layer-toggle-card">
+              <div class="layer-info">
+                <div class="layer-icon-box" style="background: rgba(251, 146, 60, 0.15); color: #fb923c;">🚒</div>
+                <div>
+                  <div class="layer-title-text">Bomba, PKOB & Depot Logistik</div>
+                  <div class="layer-desc-text">Aset penyelamat & pusat bekalan makanan</div>
+                </div>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="layer-responders" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="layer-toggle-card">
+              <div class="layer-info">
+                <div class="layer-icon-box" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">🛣️</div>
+                <div>
+                  <div class="layer-title-text">Rangkaian Jalan & Sekatan</div>
+                  <div class="layer-desc-text">Status laluan selamat, amaran dan tertutup</div>
+                </div>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="layer-roads" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="layer-toggle-card">
+              <div class="layer-info">
+                <div class="layer-icon-box" style="background: rgba(139, 92, 246, 0.15); color: #a78bfa;">📡</div>
+                <div>
+                  <div class="layer-title-text">Telemetri Sensor Paras Air IoT</div>
+                  <div class="layer-desc-text">Pemantauan aras air retention pond & alur air</div>
+                </div>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="layer-sensors" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <!-- Quick township location jump buttons -->
+            <div class="panel-section-title" style="margin-top: 20px;">
+              <span>Pintasan Lokasi Perbandaran</span>
+            </div>
+            <div class="quick-locations-grid">
+              <button class="btn-quick-loc" data-lat="3.1855" data-lng="101.5042">📍 Dewan Elmina West</button>
+              <button class="btn-quick-loc" data-lat="3.1882" data-lng="101.5078">📍 Rainbow Bridge</button>
+              <button class="btn-quick-loc" data-lat="3.1755" data-lng="101.5020">📍 Jambatan Sg. Buloh</button>
+              <button class="btn-quick-loc" data-lat="3.1660" data-lng="101.5185">📍 Klinik Denai Alam</button>
+            </div>
+          </div>
+
+          <!-- TAB 2: PAPARAN DASHBOARD (Slot Ahli 2: Ana) -->
+          <div class="tab-pane" id="pane-dashboard">
+            <div class="panel-section-title">
+              <span>Status Fasiliti & Senarai Sumber</span>
+              <span class="section-author-badge" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; border-color: rgba(245, 158, 11, 0.3);">Ahli 2: Ana</span>
+            </div>
+
+            <div class="stat-metric-grid">
+              <div class="metric-card" style="--card-accent: #38bdf8;">
+                <div class="metric-label">Kapasiti PPS</div>
+                <div class="metric-value" id="kpi-pps-occupancy">648 / 1400</div>
+                <div class="metric-sub">46% Kapasiti Digunakan</div>
+              </div>
+              <div class="metric-card" style="--card-accent: #ef4444;">
+                <div class="metric-label">Laluan Terjejas</div>
+                <div class="metric-value" id="kpi-roads-affected">2 Jalan</div>
+                <div class="metric-sub">1 Ditutup, 1 Amaran</div>
+              </div>
+              <div class="metric-card" style="--card-accent: #10b981;">
+                <div class="metric-label">Bot Penyelamat</div>
+                <div class="metric-value">5 / 8 Bot</div>
+                <div class="metric-sub">3 Unit Sedia Digalas</div>
+              </div>
+              <div class="metric-card" style="--card-accent: #a855f7;">
+                <div class="metric-label">Stok Makanan (MRE)</div>
+                <div class="metric-value">2,350 Pek</div>
+                <div class="metric-sub">Depot Elmina East</div>
+              </div>
+            </div>
+
+            <div class="panel-section-title">
+              <span>Senarai Pusat Pemindahan (PPS)</span>
+            </div>
+            <div class="facility-status-list" id="dashboard-facility-list">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- TAB 3: BUTANG KAWALAN SIMULASI (Slot Ahli 3: Aufa) -->
+          <div class="tab-pane" id="pane-simulation">
+            <div class="panel-section-title">
+              <span>Kawalan Senario Simulasi Bencana</span>
+              <span class="section-author-badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border-color: rgba(239, 68, 68, 0.3);">Ahli 3: Aufa</span>
+            </div>
+
+            <div class="simulation-banner">
+              <strong style="color: #f87171; display: block; margin-bottom: 4px;">⚠️ Simulator Situasi Banjir Perbandaran</strong>
+              <p style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.4;">
+                Uji ketahanan pelan tindak balas dengan mensimulasikan kenaikan paras air tasik, limpahan parit, dan sekatan jalan raya.
+              </p>
+            </div>
+
+            <div class="scenario-select-group">
+              <label for="sim-scenario-select">Pilih Mod Senario:</label>
+              <select id="sim-scenario-select" class="custom-select">
+                <option value="flash_flood">Hujan Lebat Monsun (Banjir Kilat 60 minit)</option>
+                <option value="dam_overflow">Limpahan Takungan Elmina Retention Pond</option>
+                <option value="critical_cut">Senario Ekstrem: Semua Jambatan Utama Terputus</option>
+              </select>
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <span>Paras Kenaikan Air Simulasi:</span>
+                <strong id="sim-water-val" style="color: var(--accent-cyan);">+0.60 m</strong>
+              </div>
+              <input type="range" id="sim-water-slider" class="range-slider" min="0" max="2.5" step="0.1" value="0.6">
+            </div>
+
+            <div class="panel-section-title" style="margin-top: 14px;">
+              <span>Kawalan Sekatan Jalan Raya Segera:</span>
+            </div>
+            <div class="facility-status-list" id="simulation-roads-list">
+              <!-- Dynamically populated toggle for each road -->
+            </div>
+
+            <div class="sim-actions-grid">
+              <button class="btn-sim-action primary" id="btn-trigger-sim">
+                <span>⚡</span>
+                <span>Jalankan Simulasi</span>
+              </button>
+              <button class="btn-sim-action secondary" id="btn-reset-sim">
+                <span>🔄</span>
+                <span>Reset Asal</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- TAB 4: BACKEND & LOGIK LALUAN (Slot Ahli 4) -->
+          <div class="tab-pane" id="pane-routing">
+            <div class="panel-section-title">
+              <span>Perancang Laluan Adaptif (A* / Dijkstra)</span>
+              <span class="section-author-badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border-color: rgba(56, 189, 248, 0.3);">Ahli 4: Routing</span>
+            </div>
+
+            <div class="route-planner-card">
+              <div class="route-input-row">
+                <div class="route-node-icon start">A</div>
+                <div style="flex: 1;">
+                  <label style="font-size: 0.68rem; color: var(--text-dim); display: block;">Titik Permulaan Penduduk:</label>
+                  <select id="route-origin-select" class="custom-select" style="padding: 6px 8px; font-size: 0.78rem;">
+                    <option value="loc-redzone">Zon Merah (Sektor Bawah Sg. Buloh)</option>
+                    <option value="loc-centralpark">Taman Rekreasi Elmina Central Park</option>
+                    <option value="loc-denai">Denai Alam Seksyen U16</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="route-input-row">
+                <div class="route-node-icon end">B</div>
+                <div style="flex: 1;">
+                  <label style="font-size: 0.68rem; color: var(--text-dim); display: block;">Destinasi Pemindahan:</label>
+                  <select id="route-destination-select" class="custom-select" style="padding: 6px 8px; font-size: 0.78rem;">
+                    <option value="pps-01">Dewan Komuniti Elmina West (Kapasiti: 450)</option>
+                    <option value="pps-02">SK Subang Bestari (Kapasiti: 600)</option>
+                    <option value="pps-03">Kompleks Sukan Denai Alam (Standby)</option>
+                  </select>
+                </div>
+              </div>
+
+              <button class="btn-calc-route" id="btn-calc-route">
+                <span>🧭</span>
+                <span>Kira Laluan Selamat Alternatif</span>
+              </button>
+            </div>
+
+            <div id="route-result-container" class="route-result-box" style="display: none;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <strong style="color: #00f2fe; font-size: 0.82rem;">Laluan Selamat Ditemui</strong>
+                <span class="badge" style="background: rgba(0, 230, 118, 0.2); color: #00e676; font-size: 0.68rem; padding: 2px 6px; border-radius: 4px;">Lulus Penilaian Risiko</span>
+              </div>
+              <p style="font-size: 0.74rem; color: var(--text-muted); line-height: 1.4;" id="route-result-text">
+                Mengelak Jambatan Sungai Buloh (Dinaiki air 65cm). Menggunakan Elmina East Bypass & Persiaran Elmina. Jangkaan masa perjalanan: 7 minit (3.8 km).
+              </p>
+            </div>
+          </div>
+
+          <!-- TAB 5: PENGURUSAN DATA & UJIAN (Slot Ahli 5: Piqa) -->
+          <div class="tab-pane" id="pane-data-test">
+            <div class="panel-section-title">
+              <span>Data Fasiliti & Log Audit</span>
+              <span class="section-author-badge" style="background: rgba(168, 85, 247, 0.15); color: #c084fc; border-color: rgba(168, 85, 247, 0.3);">Ahli 5: Piqa</span>
+            </div>
+
+            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+              <button class="btn-quick-loc" id="btn-add-dummy-fac" style="flex: 1; text-align: center;">➕ Tambah Titik Fasiliti</button>
+              <button class="btn-quick-loc" id="btn-export-geojson" style="flex: 1; text-align: center;">📥 Eksport Data</button>
+            </div>
+
+            <div class="panel-section-title">
+              <span>Log Audit Aktiviti Sistem (Live Event Log)</span>
+            </div>
+            <div class="audit-log-list" id="audit-log-list">
+              <!-- Dynamically populated from store -->
+            </div>
+          </div>
+
+        </div>
+      </aside>
+
+    </main>
+
+    <!-- 4. BOTTOM LIVE ALERT TICKER -->
+    <footer class="alert-ticker-bar">
+      <div class="ticker-badge">NOTIFIKASI KRITIKAL</div>
+      <div class="ticker-content" id="alert-ticker-text">
+        [09:28] NADMA & Jabatan Pengairan: Amaran siren banjir tahap 2 diaktifkan di Sungai Buloh. Penduduk Sektor Bawah dinasihatkan mematuhi arahan pemindahan ke Dewan Komuniti Elmina West.
+      </div>
+      <div class="ticker-meta">SIME DARBY PROPERTY EMERGENCY COMMAND</div>
+    </footer>
+
+    <!-- 5. MODAL STRUKTUR PASUKAN & HACKATHON INFO -->
+    <div class="modal-backdrop" id="team-modal">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3 style="color: var(--accent-cyan); font-size: 1.1rem;">Struktur Pasukan & Prototaip NADITOWN</h3>
+          <button class="btn-close-modal" id="btn-close-modal">&times;</button>
+        </div>
+        <div style="line-height: 1.6; font-size: 0.85rem; color: var(--text-muted);">
+          <p style="margin-bottom: 12px;">
+            <strong style="color: white;">Sime Darby Property University Hackathon 2026</strong><br>
+            Tema: <em>People and Planet</em> | Skop: <em>Adaptive Township Emergency Operating System (City of Elmina)</em>
+          </p>
+          
+          <div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 12px; margin-bottom: 12px; border-left: 3px solid var(--accent-cyan);">
+            <strong style="color: var(--accent-cyan);">Ahli 1: Salman (Bahagian Anda)</strong><br>
+            <span>Prototaip: Peta Utama & User Interface (UI) Command Center, Integrasi Leaflet GIS, Layer Poligon Banjir, Tactical Theme, Sistem Tab Modular.</span>
+          </div>
+
+          <div style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px; margin-bottom: 8px;">
+            <strong style="color: #fbbf24;">Ahli 2: Ana</strong><br>
+            <span>Paparan Dashboard: Status Fasiliti, Bilangan Penghuni PPS, & Inventori Sumber (Bot, MRE, Pasukan Kesihatan).</span>
+          </div>
+
+          <div style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px; margin-bottom: 8px;">
+            <strong style="color: #f87171;">Ahli 3: Aufa</strong><br>
+            <span>Kawalan Simulasi: Pilihan Senario Banjir, Peluncur Paras Air & Suis Sekatan Jalan Raya.</span>
+          </div>
+
+          <div style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px; margin-bottom: 8px;">
+            <strong style="color: #38bdf8;">Ahli 4</strong><br>
+            <span>Backend & Logik Laluan: Algoritma Pencarian Laluan Selamat (A* / Dijkstra) apabila segmen jalan dinaiki air.</span>
+          </div>
+
+          <div style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px;">
+            <strong style="color: #c084fc;">Ahli 5: Piqa</strong><br>
+            <span>Kemasukan Data: 20-50 Bangunan & Jalan, Pengurusan Ujian & Audit Log.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Main JavaScript App -->
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
