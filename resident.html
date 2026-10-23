@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1113" />
+  <meta name="description" content="NADITOWN Resident SOS - flood assistance request channel for Bandar Elmina." />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="Image/naditown-icon-192.png" />
+  <title>NADITOWN Resident SOS</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1113;
+      --surface: #121c20;
+      --surface-2: #18252a;
+      --border: #2d4148;
+      --text: #f2fbfd;
+      --muted: #9fb7bf;
+      --cyan: #33bfd6;
+      --green: #1f9d8b;
+      --red: #ef4444;
+      --amber: #e0a21a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html { background: var(--bg); }
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      background:
+        radial-gradient(circle at 15% 0%, rgba(51, 191, 214, 0.14), transparent 38%),
+        radial-gradient(circle at 90% 10%, rgba(31, 157, 139, 0.12), transparent 34%),
+        var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      font-size: 16px;
+      line-height: 1.45;
+      padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+    }
+    button, input, select, textarea { font: inherit; }
+    a { color: var(--cyan); }
+    .app { width: min(620px, 100%); margin: 0 auto; padding: 14px 14px 34px; }
+    .top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 6px 2px 14px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .brand img { width: 48px; height: 42px; object-fit: contain; background: #fff; border-radius: 8px; padding: 3px; }
+    .brand-kicker { font-size: 9px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--cyan); }
+    .brand h1 { font-size: 16px; line-height: 1.2; font-weight: 800; }
+    .lang-switch { display: flex; border: 1px solid var(--border); border-radius: 999px; overflow: hidden; flex: 0 0 auto; }
+    .lang-switch button {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      padding: 8px 11px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      min-height: 38px;
+    }
+    .lang-switch button.active { background: var(--cyan); color: #061114; }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(51, 191, 214, 0.35);
+      background: rgba(51, 191, 214, 0.07);
+      border-radius: 9px;
+      padding: 9px 11px;
+      font-size: 12px;
+      color: #c9e8ee;
+      margin-bottom: 14px;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 4px rgba(31, 157, 139, 0.16); flex: 0 0 auto; }
+    .hero {
+      border: 1px solid var(--border);
+      background: linear-gradient(150deg, rgba(24, 37, 42, 0.96), rgba(13, 23, 27, 0.98));
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .hero h2 { font-size: clamp(24px, 7vw, 34px); line-height: 1.08; letter-spacing: -0.02em; margin: 4px 0 8px; }
+    .hero p { color: var(--muted); font-size: 14px; }
+    .call-999 {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 52px;
+      margin: 12px 0;
+      border-radius: 9px;
+      border: 1px solid rgba(239, 68, 68, 0.65);
+      background: rgba(239, 68, 68, 0.13);
+      color: #ffd5d5;
+      text-decoration: none;
+      font-weight: 800;
+      font-size: 15px;
+      text-align: center;
+      padding: 10px;
+    }
+    .card {
+      border: 1px solid var(--border);
+      background: rgba(18, 28, 32, 0.96);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .card h3 { font-size: 17px; margin-bottom: 4px; }
+    .card-sub { font-size: 12px; color: var(--muted); margin-bottom: 14px; }
+    .field { margin-bottom: 13px; }
+    .field label, .group-label { display: block; font-size: 12px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: #b9d2d9; margin-bottom: 6px; }
+    .field input, .field select, .field textarea {
+      width: 100%;
+      min-height: 50px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface-2);
+      color: var(--text);
+      padding: 11px 12px;
+      font-size: 16px;
+      outline: none;
+    }
+    .field textarea { min-height: 88px; resize: vertical; }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(51, 191, 214, 0.13); }
+    .field input::placeholder, .field textarea::placeholder { color: #748e97; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .hint { font-size: 11px; color: var(--muted); margin-top: 5px; }
+    .locate-btn {
+      width: 100%;
+      min-height: 46px;
+      margin-top: 8px;
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      background: rgba(51, 191, 214, 0.05);
+      color: var(--cyan);
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .locate-status { font-size: 11px; color: var(--muted); margin-top: 6px; }
+    .segmented { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+    .segmented label { position: relative; display: block; }
+    .segmented input { position: absolute; opacity: 0; inset: 0; }
+    .segmented span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      text-align: center;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface-2);
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--muted);
+      padding: 6px;
+    }
+    .segmented input:checked + span { border-color: var(--cyan); background: rgba(51, 191, 214, 0.14); color: var(--text); }
+    .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    .check { display: flex; align-items: flex-start; gap: 8px; min-height: 42px; border: 1px solid var(--border); background: var(--surface-2); border-radius: 8px; padding: 9px; font-size: 12px; color: #d6e9ed; }
+    .check input { width: 18px; height: 18px; margin-top: 1px; accent-color: var(--cyan); flex: 0 0 auto; }
+    .consent { display: flex; align-items: flex-start; gap: 10px; border: 1px solid var(--border); background: rgba(51, 191, 214, 0.04); border-radius: 8px; padding: 11px; font-size: 12px; color: #cfe4e9; margin: 4px 0 14px; }
+    .consent input { width: 20px; height: 20px; accent-color: var(--cyan); flex: 0 0 auto; }
+    .submit {
+      width: 100%;
+      min-height: 62px;
+      border: 0;
+      border-radius: 9px;
+      background: linear-gradient(135deg, #33bfd6, #1f9d8b);
+      color: #041012;
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      box-shadow: 0 10px 28px rgba(51, 191, 214, 0.2);
+    }
+    .submit:active { transform: translateY(1px); }
+    .form-error { display: none; border: 1px solid rgba(239, 68, 68, 0.55); background: rgba(239, 68, 68, 0.12); color: #ffd5d5; border-radius: 8px; padding: 9px 11px; font-size: 12px; margin-bottom: 10px; }
+    .form-error.show { display: block; }
+    .success { display: none; border: 1px solid rgba(31, 157, 139, 0.55); background: rgba(31, 157, 139, 0.12); border-radius: 9px; padding: 12px; margin-bottom: 12px; }
+    .success.show { display: block; }
+    .success strong { display: block; color: #baf5ea; margin-bottom: 3px; }
+    .success span { font-size: 12px; color: #cfe9e4; }
+    .queue { display: flex; flex-direction: column; gap: 7px; }
+    .queue-item { border: 1px solid var(--border); background: var(--surface-2); border-radius: 8px; padding: 9px 10px; }
+    .queue-top { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--muted); }
+    .queue-top strong { color: var(--cyan); font-family: ui-monospace, monospace; }
+    .queue-need { font-size: 12px; color: var(--text); margin-top: 3px; }
+    .queue-status { font-size: 10px; color: var(--green); font-weight: 800; margin-top: 3px; }
+    .empty { border: 1px dashed var(--border); border-radius: 8px; padding: 12px; color: var(--muted); font-size: 12px; }
+    .info-grid { display: grid; gap: 8px; }
+    .info-row { display: flex; gap: 8px; font-size: 12px; color: var(--muted); }
+    .info-row strong { color: var(--text); min-width: 92px; }
+    .disclaimer { font-size: 10px; line-height: 1.5; color: #7f979f; padding: 2px 4px 0; }
+    .footer { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-top: 18px; font-size: 10px; color: #718a92; }
+    .footer a { color: #8ebfc9; }
+    @media (max-width: 380px) {
+      .field-row, .checks { grid-template-columns: 1fr; }
+      .brand h1 { font-size: 14px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="top">
+      <div class="brand">
+        <img src="Image/naditown-mark.png" alt="NADITOWN" />
+        <div>
+          <div class="brand-kicker">Resident channel</div>
+          <h1>NADITOWN SOS</h1>
+        </div>
+      </div>
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button type="button" data-lang="en" class="active">EN</button>
+        <button type="button" data-lang="ms">BM</button>
+      </div>
+    </header>
+
+    <div class="status">
+      <span class="dot"></span>
+      <span data-i18n="offlineStatus">Works offline. Requests queue on this device.</span>
+    </div>
+
+    <section class="hero">
+      <div class="brand-kicker" style="color:#fca5a5;" data-i18n="emergencyKicker">Flood emergency</div>
+      <h2 data-i18n="heroTitle">Get help from the township command centre.</h2>
+      <p data-i18n="heroBody">Describe what your household needs. If life is in immediate danger, call 999 first.</p>
+    </section>
+
+    <a class="call-999" href="tel:999" data-i18n="call999">Call 999 now for immediate danger</a>
+
+    <section class="card">
+      <h3 data-i18n="formTitle">Send an assistance request</h3>
+      <p class="card-sub" data-i18n="formSub">Only share what the response team needs. Phone numbers are masked in the command view.</p>
+      <div class="form-error" id="form-error" role="alert"></div>
+      <div class="success" id="success-box" role="status">
+        <strong id="success-title">Request saved</strong>
+        <span id="success-copy">It is queued on this device and will appear in the command centre when the browser syncs.</span>
+      </div>
+
+      <form id="sos-form" novalidate>
+        <div class="field">
+          <label for="name" data-i18n="nameLabel">Household head / name</label>
+          <input id="name" name="name" type="text" autocomplete="name" maxlength="80" required data-i18n-ph="namePlaceholder" placeholder="e.g. Aisyah Rahman" />
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="phone" data-i18n="phoneLabel">Phone (optional)</label>
+            <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="24" data-i18n-ph="phonePlaceholder" placeholder="e.g. 012-345 6789" />
+          </div>
+          <div class="field">
+            <label for="household" data-i18n="householdLabel">People</label>
+            <input id="household" name="household" type="number" inputmode="numeric" min="1" max="30" value="1" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="sector" data-i18n="sectorLabel">Sector</label>
+          <select id="sector" name="sector">
+            <option value="1">Sector 1</option>
+            <option value="2">Sector 2</option>
+            <option value="3">Sector 3</option>
+            <option value="4">Sector 4</option>
+            <option value="5">Sector 5</option>
+            <option value="6">Sector 6</option>
+            <option value="7">Sector 7</option>
+          </select>
+          <button class="locate-btn" type="button" id="locate-btn" data-i18n="useLocation">Use my current location</button>
+          <div class="locate-status" id="locate-status" data-i18n="locationHint">If GPS is denied, the sector centre is used.</div>
+        </div>
+
+        <div class="field">
+          <label for="address" data-i18n="addressLabel">Street or landmark (optional)</label>
+          <input id="address" name="address" type="text" maxlength="120" data-i18n-ph="addressPlaceholder" placeholder="e.g. Jalan Elmina Green 3, near surau" />
+        </div>
+
+        <div class="field">
+          <label for="category" data-i18n="needLabel">What do you need?</label>
+          <select id="category" name="category">
+            <option value="medical_evacuation" data-i18n="needMedical">Medical help or evacuation</option>
+            <option value="water_rescue" data-i18n="needRescue">Water rescue</option>
+            <option value="food_supply" data-i18n="needFood">Food and drinking water</option>
+            <option value="shelter_supplies" data-i18n="needShelter">Shelter supplies</option>
+            <option value="power_supply" data-i18n="needPower">Power or generator</option>
+            <option value="evacuation_transport" data-i18n="needTransport">Transport to a shelter</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <span class="group-label" data-i18n="urgencyLabel">Urgency</span>
+          <div class="segmented">
+            <label><input type="radio" name="urgency" value="critical" checked /><span data-i18n="urgencyCritical">Critical</span></label>
+            <label><input type="radio" name="urgency" value="high" /><span data-i18n="urgencyHigh">High</span></label>
+            <label><input type="radio" name="urgency" value="medium" /><span data-i18n="urgencyModerate">Moderate</span></label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="details" data-i18n="detailsLabel">Details</label>
+          <textarea id="details" name="details" maxlength="400" data-i18n-ph="detailsPlaceholder" placeholder="e.g. Water at waist level, elderly grandmother cannot walk, need boat."></textarea>
+        </div>
+
+        <div class="field">
+          <span class="group-label" data-i18n="vulnerabilityLabel">Household support needs</span>
+          <div class="checks">
+            <label class="check"><input type="checkbox" name="support" value="elderly" /><span data-i18n="supportElderly">Elderly person</span></label>
+            <label class="check"><input type="checkbox" name="support" value="infant" /><span data-i18n="supportInfant">Infant or young child</span></label>
+            <label class="check"><input type="checkbox" name="support" value="wheelchair" /><span data-i18n="supportWheelchair">Wheelchair user</span></label>
+            <label class="check"><input type="checkbox" name="support" value="medical" /><span data-i18n="supportMedical">Medical condition</span></label>
+          </div>
+        </div>
+
+        <label class="consent">
+          <input type="checkbox" id="consent" required />
+          <span data-i18n="consentLabel">I agree to share this request with the township command centre for this emergency. This is a prototype and does not replace 999.</span>
+        </label>
+
+        <button class="submit" type="submit" data-i18n="submitBtn">Send assistance request</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h3 data-i18n="queueTitle">Requests on this device</h3>
+      <p class="card-sub" data-i18n="queueSub">The command centre imports queued requests through the local demo sync.</p>
+      <div class="queue" id="queue-list"></div>
+    </section>
+
+    <section class="card">
+      <h3 data-i18n="aboutTitle">How this works</h3>
+      <div class="info-grid">
+        <div class="info-row"><strong data-i18n="aboutOneLabel">Offline first</strong><span data-i18n="aboutOneBody">The request is saved before any network call.</span></div>
+        <div class="info-row"><strong data-i18n="aboutTwoLabel">Privacy</strong><span data-i18n="aboutTwoBody">Command only sees a masked phone number.</span></div>
+        <div class="info-row"><strong data-i18n="aboutThreeLabel">Demo sync</strong><span data-i18n="aboutThreeBody">Use the same browser profile as the command screen.</span></div>
+      </div>
+    </section>
+
+    <p class="disclaimer" data-i18n="disclaimer">Prototype only. Demonstrated in Bandar Elmina. Not a field-verified emergency system, not a substitute for official warnings, PKOB instructions or emergency services.</p>
+
+    <footer class="footer">
+      <span>NADITOWN - Sime Darby Property</span>
+      <a href="dashboard.html" data-i18n="commandLink">Command centre</a>
+    </footer>
+  </div>
+
+  <script>
+    const QUEUE_KEY = 'naditown.sosQueue.v1';
+    const SECTORS = {
+      1: [3.1552, 101.5102],
+      2: [3.1592, 101.5254],
+      3: [3.1668, 101.5412],
+      4: [3.1741, 101.5538],
+      5: [3.1812, 101.5664],
+      6: [3.1885, 101.5792],
+      7: [3.1958, 101.5918]
+    };
+    const translations = {
+      en: {
+        offlineStatus: 'Works offline. Requests queue on this device.',
+        emergencyKicker: 'Flood emergency',
+        heroTitle: 'Get help from the township command centre.',
+        heroBody: 'Describe what your household needs. If life is in immediate danger, call 999 first.',
+        call999: 'Call 999 now for immediate danger',
+        formTitle: 'Send an assistance request',
+        formSub: 'Only share what the response team needs. Phone numbers are masked in the command view.',
+        nameLabel: 'Household head / name',
+        namePlaceholder: 'e.g. Aisyah Rahman',
+        phoneLabel: 'Phone (optional)',
+        phonePlaceholder: 'e.g. 012-345 6789',
+        householdLabel: 'People',
+        sectorLabel: 'Sector',
+        useLocation: 'Use my current location',
+        locationHint: 'If GPS is denied, the sector centre is used.',
+        addressLabel: 'Street or landmark (optional)',
+        addressPlaceholder: 'e.g. Jalan Elmina Green 3, near surau',
+        needLabel: 'What do you need?',
+        needMedical: 'Medical help or evacuation',
+        needRescue: 'Water rescue',
+        needFood: 'Food and drinking water',
+        needShelter: 'Shelter supplies',
+        needPower: 'Power or generator',
+        needTransport: 'Transport to a shelter',
+        urgencyLabel: 'Urgency',
+        urgencyCritical: 'Critical',
+        urgencyHigh: 'High',
+        urgencyModerate: 'Moderate',
+        detailsLabel: 'Details',
+        detailsPlaceholder: 'e.g. Water at waist level, elderly grandmother cannot walk, need boat.',
+        vulnerabilityLabel: 'Household support needs',
+        supportElderly: 'Elderly person',
+        supportInfant: 'Infant or young child',
+        supportWheelchair: 'Wheelchair user',
+        supportMedical: 'Medical condition',
+        consentLabel: 'I agree to share this request with the township command centre for this emergency. This is a prototype and does not replace 999.',
+        submitBtn: 'Send assistance request',
+        queueTitle: 'Requests on this device',
+        queueSub: 'The command centre imports queued requests through the local demo sync.',
+        aboutTitle: 'How this works',
+        aboutOneLabel: 'Offline first',
+        aboutOneBody: 'The request is saved before any network call.',
+        aboutTwoLabel: 'Privacy',
+        aboutTwoBody: 'Command only sees a masked phone number.',
+        aboutThreeLabel: 'Demo sync',
+        aboutThreeBody: 'Use the same browser profile as the command screen.',
+        disclaimer: 'Prototype only. Demonstrated in Bandar Elmina. Not a field-verified emergency system, not a substitute for official warnings, PKOB instructions or emergency services.',
+        commandLink: 'Command centre',
+        errorName: 'Enter the household name.',
+        errorSector: 'Choose a sector.',
+        errorConsent: 'Tick the consent box before sending.',
+        successTitle: 'Request saved',
+        successCopy: 'It is queued on this device and will appear in the command centre when the browser syncs.',
+        locateLoading: 'Getting your location...',
+        locateReady: 'GPS captured. The request will use this location.',
+        locateDenied: 'GPS unavailable. The sector centre will be used.',
+        queueStatus: 'Queued for command sync',
+        queueSynced: 'Synced to command',
+        noQueue: 'No requests saved on this device yet.'
+      },
+      ms: {
+        offlineStatus: 'Berfungsi luar talian. Permintaan disimpan pada peranti ini.',
+        emergencyKicker: 'Kecemasan banjir',
+        heroTitle: 'Dapatkan bantuan daripada pusat kawalan taman perumahan.',
+        heroBody: 'Nyatakan keperluan isi rumah anda. Jika nyawa dalam bahaya, hubungi 999 dahulu.',
+        call999: 'Hubungi 999 sekarang untuk bahaya segera',
+        formTitle: 'Hantar permintaan bantuan',
+        formSub: 'Kongsi hanya maklumat yang diperlukan. Nombor telefon akan disembunyikan di paparan kawalan.',
+        nameLabel: 'Ketua isi rumah / nama',
+        namePlaceholder: 'cth. Aisyah Rahman',
+        phoneLabel: 'Telefon (pilihan)',
+        phonePlaceholder: 'cth. 012-345 6789',
+        householdLabel: 'Bilangan orang',
+        sectorLabel: 'Sektor',
+        useLocation: 'Gunakan lokasi semasa',
+        locationHint: 'Jika GPS ditolak, pusat sektor akan digunakan.',
+        addressLabel: 'Jalan atau mercu tanda (pilihan)',
+        addressPlaceholder: 'cth. Jalan Elmina Green 3, berhampiran surau',
+        needLabel: 'Apa yang anda perlukan?',
+        needMedical: 'Bantuan perubatan atau pemindahan',
+        needRescue: 'Penyelamatan air',
+        needFood: 'Makanan dan air minuman',
+        needShelter: 'Bekalan tempat perlindungan',
+        needPower: 'Kuasa elektrik atau penjana',
+        needTransport: 'Pengangkutan ke pusat pemindahan',
+        urgencyLabel: 'Tahap segera',
+        urgencyCritical: 'Kritikal',
+        urgencyHigh: 'Tinggi',
+        urgencyModerate: 'Sederhana',
+        detailsLabel: 'Butiran',
+        detailsPlaceholder: 'cth. Air paras pinggang, nenek tidak boleh berjalan, perlukan bot.',
+        vulnerabilityLabel: 'Keperluan sokongan isi rumah',
+        supportElderly: 'Warga emas',
+        supportInfant: 'Bayi atau kanak-kanak kecil',
+        supportWheelchair: 'Pengguna kerusi roda',
+        supportMedical: 'Masalah kesihatan',
+        consentLabel: 'Saya bersetuju untuk berkongsi permintaan ini dengan pusat kawalan taman untuk kecemasan ini. Ini prototaip dan bukan pengganti 999.',
+        submitBtn: 'Hantar permintaan bantuan',
+        queueTitle: 'Permintaan pada peranti ini',
+        queueSub: 'Pusat kawalan mengimport permintaan melalui penyegerakan demo setempat.',
+        aboutTitle: 'Cara ia berfungsi',
+        aboutOneLabel: 'Luar talian dahulu',
+        aboutOneBody: 'Permintaan disimpan sebelum sebarang panggilan rangkaian.',
+        aboutTwoLabel: 'Privasi',
+        aboutTwoBody: 'Pusat kawalan hanya melihat nombor telefon yang disembunyikan.',
+        aboutThreeLabel: 'Sync demo',
+        aboutThreeBody: 'Gunakan profil pelayar yang sama dengan skrin kawalan.',
+        disclaimer: 'Prototaip sahaja. Demonstrasi di Bandar Elmina. Bukan sistem kecemasan yang disahkan di lapangan, bukan pengganti amaran rasmi, arahan PKOB atau perkhidmatan kecemasan.',
+        commandLink: 'Pusat kawalan',
+        errorName: 'Masukkan nama ketua isi rumah.',
+        errorSector: 'Pilih sektor.',
+        errorConsent: 'Tandakan kotak persetujuan sebelum menghantar.',
+        successTitle: 'Permintaan disimpan',
+        successCopy: 'Ia disimpan pada peranti ini dan akan muncul di pusat kawalan apabila pelayar menyegerak.',
+        locateLoading: 'Mendapatkan lokasi anda...',
+        locateReady: 'GPS diperoleh. Permintaan akan menggunakan lokasi ini.',
+        locateDenied: 'GPS tidak tersedia. Pusat sektor akan digunakan.',
+        queueStatus: 'Menunggu sync pusat kawalan',
+        queueSynced: 'Telah disegerak ke pusat kawalan',
+        noQueue: 'Belum ada permintaan disimpan pada peranti ini.'
+      }
+    };
+
+    let activeLang = localStorage.getItem('naditown.lang') || 'en';
+    let capturedLocation = null;
+
+    function t(key) {
+      return (translations[activeLang] && translations[activeLang][key]) || translations.en[key] || key;
+    }
+
+    function applyLanguage() {
+      document.documentElement.lang = activeLang === 'ms' ? 'ms' : 'en';
+      document.querySelectorAll('[data-i18n]').forEach(element => {
+        const key = element.dataset.i18n;
+        if (t(key)) element.textContent = t(key);
+      });
+      document.querySelectorAll('[data-i18n-ph]').forEach(element => {
+        const key = element.dataset.i18nPh;
+        if (t(key)) element.placeholder = t(key);
+      });
+      document.querySelectorAll('[data-lang]').forEach(button => {
+        button.classList.toggle('active', button.dataset.lang === activeLang);
+      });
+      const successTitle = document.getElementById('success-title');
+      const successCopy = document.getElementById('success-copy');
+      if (successTitle) successTitle.textContent = t('successTitle');
+      if (successCopy) successCopy.textContent = t('successCopy');
+      renderQueue();
+    }
+
+    function queue() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]');
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveQueue(items) {
+      try {
+        localStorage.setItem(QUEUE_KEY, JSON.stringify(items));
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function renderQueue() {
+      const container = document.getElementById('queue-list');
+      if (!container) return;
+      const items = queue();
+      container.innerHTML = '';
+      if (!items.length) {
+        const empty = document.createElement('div');
+        empty.className = 'empty';
+        empty.textContent = t('noQueue');
+        container.appendChild(empty);
+        return;
+      }
+      items.slice(0, 6).forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'queue-item';
+        const top = document.createElement('div');
+        top.className = 'queue-top';
+        const id = document.createElement('strong');
+        id.textContent = item.id;
+        const time = document.createElement('span');
+        time.textContent = new Date(item.submittedAt).toLocaleString();
+        top.append(id, time);
+        const need = document.createElement('div');
+        need.className = 'queue-need';
+        need.textContent = `${item.location} - ${item.need}`;
+        const status = document.createElement('div');
+        status.className = 'queue-status';
+        status.textContent = item.imported ? t('queueSynced') : t('queueStatus');
+        card.append(top, need, status);
+        container.appendChild(card);
+      });
+    }
+
+    function showError(message) {
+      const box = document.getElementById('form-error');
+      box.textContent = message;
+      box.classList.add('show');
+      box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function hideError() {
+      const box = document.getElementById('form-error');
+      box.classList.remove('show');
+    }
+
+    document.querySelectorAll('[data-lang]').forEach(button => {
+      button.addEventListener('click', () => {
+        activeLang = button.dataset.lang === 'ms' ? 'ms' : 'en';
+        localStorage.setItem('naditown.lang', activeLang);
+        applyLanguage();
+      });
+    });
+
+    document.getElementById('locate-btn').addEventListener('click', () => {
+      const status = document.getElementById('locate-status');
+      if (!navigator.geolocation) {
+        status.textContent = t('locateDenied');
+        return;
+      }
+      status.textContent = t('locateLoading');
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          capturedLocation = [position.coords.latitude, position.coords.longitude];
+          status.textContent = t('locateReady');
+        },
+        () => {
+          capturedLocation = null;
+          status.textContent = t('locateDenied');
+        },
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+      );
+    });
+
+    document.getElementById('sos-form').addEventListener('submit', event => {
+      event.preventDefault();
+      hideError();
+      const name = document.getElementById('name').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const household = Math.max(1, Math.min(30, Number(document.getElementById('household').value) || 1));
+      const sector = document.getElementById('sector').value;
+      const address = document.getElementById('address').value.trim();
+      const category = document.getElementById('category').value;
+      const categoryLabel = document.querySelector('#category option:checked')?.textContent || category;
+      const details = document.getElementById('details').value.trim();
+      const urgency = document.querySelector('input[name="urgency"]:checked')?.value || 'high';
+      const support = Array.from(document.querySelectorAll('input[name="support"]:checked')).map(item => item.value);
+      const consent = document.getElementById('consent').checked;
+
+      if (!name) return showError(t('errorName'));
+      if (!sector) return showError(t('errorSector'));
+      if (!consent) return showError(t('errorConsent'));
+
+      const area = `Sector ${sector}, Bandar Elmina${address ? ' - ' + address : ''}`;
+      const needParts = [categoryLabel];
+      if (details) needParts.push(details);
+      if (support.length) needParts.push(`Support: ${support.join(', ')}`);
+
+      const item = {
+        id: `SOS-${Date.now().toString(36).toUpperCase()}`,
+        requester: name,
+        phone,
+        location: area,
+        coordinates: capturedLocation || SECTORS[sector],
+        need: needParts.join(' | '),
+        category,
+        urgency,
+        quantity: household,
+        support,
+        submittedAt: new Date().toISOString(),
+        imported: false
+      };
+
+      const items = queue();
+      items.unshift(item);
+      if (!saveQueue(items)) {
+        showError('This browser could not save the request. Please call 999 if you are in danger.');
+        return;
+      }
+
+      document.getElementById('success-box').classList.add('show');
+      document.getElementById('sos-form').reset();
+      document.getElementById('household').value = '1';
+      capturedLocation = null;
+      document.getElementById('locate-status').textContent = t('locationHint');
+      renderQueue();
+      window.setTimeout(() => document.getElementById('success-box').classList.remove('show'), 8000);
+    });
+
+    window.addEventListener('storage', event => {
+      if (event.key === QUEUE_KEY) renderQueue();
+    });
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+      });
+    }
+
+    applyLanguage();
+    renderQueue();
+  </script>
+</body>
+</html>

@@ -1,47 +1,3734 @@
 <!DOCTYPE html>
-<html lang="ms">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NADITOWN | Adaptive Township Emergency Operating System</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NADITOWN | Adaptive Township Emergency Operating System - Sime Darby Property</title>
+  <link rel="icon" type="image/png" href="Image/naditown-mark.png" />
   
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
+  <!-- Leaflet CSS & JS CDN -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="./route-engine.js"></script>
+
   <style>
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    /* =========================================================
+       THEME PALETTE: SIME DARBY FOREST GREEN, CRISP WHITE & TIMBER BROWN
+       ========================================================= */
+    :root {
+      /* Base & Surfaces (Deep Charcoal with Cool Cyan Undertones) */
+      --bg: #0d1214;                    /* Deep charcoal slate */
+      --card-bg: #151d20;               /* Charcoal card surface */
+      --card-hover: #1d282c;            /* Slate card hover */
+      --card-inner: #1a2428;            /* Sub-container surface */
+      --border: #2a3a40;                /* Cool slate subtle border */
+      --border-light: #3d555e;          /* Lighter slate border */
+
+      /* NADITOWN Logo Cyan Accents */
+      --green-dark: #0b4a58;            /* Deep ocean cyan */
+      --green-primary: #117c96;         /* Cyan primary */
+      --green-bright: #33bfd6;          /* Logo cyan */
+      --green-emerald: #1fa9b8;         /* Teal simulated route */
+      --green-glow: rgba(51, 191, 214, 0.26);
+      --green-pill-bg: rgba(51, 191, 214, 0.15);
+
+      /* Charcoal / Slate Secondary Accents */
+      --brown-deep: #12181a;            /* Deep charcoal */
+      --brown-surface: #1d272b;         /* Slate surface */
+      --brown-border: #33454c;          /* Slate border */
+      --brown-border-light: #4b646d;    /* Lighter slate border */
+      --brown-primary: #4f8b9b;         /* Steel cyan */
+      --brown-amber: #c77c09;           /* Warning amber */
+      --brown-glow: rgba(199, 124, 9, 0.25);
+      --brown-pill-bg: rgba(199, 124, 9, 0.16);
+
+      /* Crisp White & Cool Cyan Typography */
+      --text-white: #ffffff;            /* Pure crisp white */
+      --text-ivory: #eef7f9;            /* Cool off-white headings & numbers */
+      --text-cream: #bfeaf3;            /* Pale cyan accent text */
+      --text-muted: #93aab2;            /* Muted slate-cyan */
+      --text-dim: #6c838c;              /* Subtle slate text */
+      --text-brown: #a7c3cc;            /* Light steel-cyan text */
+
+      /* Emergency Hazard Accents */
+      --accent-red: #ef4444;            /* Critical breach red */
+      --accent-red-glow: rgba(239, 68, 68, 0.25);
     }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; }
+    
     body {
-      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-      background-color: #0f172a;
-      color: #f8fafc;
+      background-color: var(--bg);
+      color: var(--text-ivory);
+      display: flex;
+      flex-direction: column;
       height: 100vh;
-      width: 100vw;
       overflow: hidden;
+      padding: 12px;
+      gap: 12px;
     }
-    #app {
-      width: 100%;
-      height: 100%;
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0d1214; }
+    ::-webkit-scrollbar-thumb { background: #2a3a40; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3d555e; }
+
+    /* Top Navigation Header */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--card-bg);
+      padding: 10px 18px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+      flex-shrink: 0;
+      gap: 16px;
+    }
+    .brand-section { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .brand-badge {
+      background: linear-gradient(135deg, #117c96, #0b4a58);
+      color: var(--text-white);
+      border: 1px solid var(--brown-primary);
+      font-weight: 800;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      letter-spacing: 0.08em;
+      box-shadow: 0 0 14px var(--green-glow);
+    }
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      background: #ffffff;
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 4px 7px;
+      box-shadow: 0 0 14px var(--green-glow);
+    }
+    .brand-logo img { display: block; height: 34px; width: auto; }
+    .brand-title { font-size: 14px; font-weight: 800; color: var(--text-white); }
+    .brand-sub { font-size: 11px; color: var(--text-brown); }
+
+    /* Multi-Page Navigation Tabs */
+    .nav-tabs-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      background: rgba(11, 17, 19, 0.85);
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .nav-page-btn {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-brown);
+      padding: 7px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
       position: relative;
     }
-    #map-viewport {
+    .nav-page-btn:hover {
+      background: var(--card-inner);
+      color: var(--text-white);
+    }
+    .nav-page-btn.active {
+      background: linear-gradient(135deg, #117c96, #0b4a58);
+      color: var(--text-white);
+      border: 1px solid var(--green-bright);
+      box-shadow: 0 0 12px var(--green-glow);
+    }
+    .nav-page-badge {
+      background: var(--brown-amber);
+      color: var(--text-white);
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-weight: 800;
+    }
+    .nav-page-btn.active .nav-page-badge {
+      background: var(--brown-surface);
+      border: 1px solid var(--brown-border-light);
+    }
+
+    /* Hamburger Menu Button */
+    .hamburger-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      width: 38px;
+      height: 38px;
+      flex-shrink: 0;
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-white);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .hamburger-btn:hover {
+      background: var(--card-hover);
+      border-color: var(--green-bright);
+      box-shadow: 0 0 10px var(--green-glow);
+    }
+    .hamburger-btn span {
+      display: block;
+      width: 18px;
+      height: 2px;
+      background: currentColor;
+      border-radius: 2px;
+    }
+
+    /* Left Slide-Out Navigation Bar */
+    .side-nav-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 1999;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(2px);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s ease, visibility 0.25s ease;
+    }
+    .side-nav-backdrop.open { opacity: 1; visibility: visible; }
+
+    .side-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 280px;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 16px;
+      overflow-y: auto;
+      background: var(--card-bg);
+      border-right: 1px solid var(--border);
+      box-shadow: 8px 0 30px rgba(0, 0, 0, 0.55);
+      transform: translateX(-100%);
+      transition: transform 0.25s ease;
+    }
+    .side-nav.open { transform: translateX(0); }
+
+    .side-nav-header {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 4px;
+    }
+    .side-nav-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: auto;
+      max-width: 100%;
+      background: #ffffff;
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 8px 10px;
+      box-shadow: 0 0 16px var(--green-glow);
+    }
+    .side-nav-logo img { display: block; width: 160px; max-width: 100%; height: auto; }
+    .side-nav-title {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .side-nav-close {
+      position: absolute;
+      top: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-brown);
+      font-size: 16px;
+      line-height: 1;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .side-nav-close:hover {
+      background: var(--card-hover);
+      color: var(--text-white);
+      border-color: var(--border-light);
+    }
+
+    .side-nav .nav-tabs-group {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 6px;
+      background: transparent;
+      border: none;
+      padding: 0;
+      border-radius: 0;
+    }
+    .side-nav .nav-page-btn {
       width: 100%;
-      height: 100%;
+      justify-content: flex-start;
+      padding: 12px 14px;
+      font-size: 13px;
+    }
+    .side-nav .nav-page-btn > span:first-child { flex: 1; text-align: left; }
+    .side-nav .nav-page-badge { margin-left: 8px; }
+
+    .side-nav-section-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-top: 8px;
+      padding: 0 4px;
+    }
+    .side-nav-status {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+    .side-nav-status .emergency-pill,
+    .side-nav-status .opr-pill,
+    .side-nav-status .clock-display {
+      justify-content: center;
+      text-align: center;
+      width: 100%;
+    }
+
+    /* Status & Time Group */
+    .status-group { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .emergency-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--brown-pill-bg);
+      color: #fde68a;
+      border: 1px solid var(--brown-primary);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+    .emergency-pill .pulsing-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #f59e0b;
+      box-shadow: 0 0 8px #f59e0b;
+      animation: pulse 1.5s infinite;
+    }
+    .opr-pill {
+      font-size: 11px;
+      color: var(--text-brown);
+      background: var(--brown-surface);
+      padding: 5px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--brown-border);
+    }
+    .clock-display { font-size: 12px; font-weight: 700; font-family: monospace; color: var(--text-white); }
+
+    /* Page View Containers */
+    .page-view-container {
+      display: none;
+      flex: 1;
+      min-height: 0;
+      flex-direction: column;
+      gap: 12px;
+      overflow: hidden;
+    }
+    .page-view-container.active {
+      display: flex;
+    }
+
+    /* Common Card Styles */
+    .op-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .op-card-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      color: var(--text-brown);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* =========================================================
+       PAGE 1: DASHBOARD (4 PRIMARY PILLARS ONLY)
+       ========================================================= */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .kpi-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: var(--card-accent, var(--green-primary));
+    }
+    .kpi-card:hover { border-color: var(--border-light); transform: translateY(-1px); }
+    .kpi-header { display: flex; justify-content: space-between; align-items: baseline; }
+    .kpi-label { font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; color: var(--text-muted); }
+    .kpi-badge { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+    .kpi-value-row { display: flex; align-items: baseline; gap: 8px; margin: 4px 0; }
+    .kpi-value { font-size: 24px; font-weight: 800; color: var(--text-white); }
+    .kpi-unit { font-size: 11px; color: var(--text-brown); font-weight: 600; }
+    
+    .kpi-subtext { font-size: 11px; color: var(--text-dim); display: flex; justify-content: space-between; align-items: center; }
+    .mini-progress-track { height: 4px; background: #1a2428; border-radius: 2px; overflow: hidden; margin-top: 6px; }
+    .mini-progress-fill { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
+
+    .kpi-resources-strip { display: flex; gap: 6px; font-size: 10px; color: var(--text-brown); margin-top: 4px; flex-wrap: wrap; }
+    .resource-badge { background: var(--brown-surface); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--brown-border); }
+
+    /* Dashboard 4 Pillars Detailed Grid */
+    .dashboard-pillars-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 12px;
+      flex: 1;
+      min-height: 0;
+    }
+    .pillar-column {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 0;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    /* Prevent dashboard cards from shrinking; let the column scroll instead */
+    .pillar-column > * { flex-shrink: 0; }
+
+    /* Road Segments Table */
+    .roads-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+    .roads-table th {
+      text-align: left;
+      padding: 8px;
+      background: var(--card-inner);
+      color: var(--text-brown);
+      font-weight: 700;
+      border-bottom: 1px solid var(--border);
+    }
+    .roads-table td {
+      padding: 9px 8px;
+      border-bottom: 1px solid #1a2428;
+      color: var(--text-ivory);
+    }
+    .roads-table tr:hover td {
+      background: rgba(51, 191, 214, 0.06);
+    }
+
+    .badge-status-clear {
+      background: var(--green-pill-bg);
+      color: var(--green-bright);
+      border: 1px solid var(--green-primary);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 10px;
+    }
+    .badge-status-hazard {
+      background: var(--brown-pill-bg);
+      color: #fde68a;
+      border: 1px solid var(--brown-amber);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 10px;
+    }
+    .badge-status-closed {
+      background: rgba(239, 68, 68, 0.18);
+      color: var(--accent-red);
+      border: 1px solid var(--accent-red);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 10px;
+    }
+    .risk-tag {
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+    .risk-low { color: #33bfd6; background: rgba(51, 191, 214, 0.15); }
+    .risk-moderate { color: #f59e0b; background: rgba(245, 158, 11, 0.15); }
+    .risk-danger { color: #ef4444; background: rgba(239, 68, 68, 0.15); }
+
+    /* Shelter Detail Cards */
+    .shelter-cards-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .detail-stat-card {
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      transition: all 0.15s ease;
+    }
+    .detail-stat-card:hover {
+      border-color: var(--border-light);
+      background: var(--card-hover);
+    }
+
+    /* Requests Summary Metric Tiles */
+    .summary-metric-tile {
+      background: var(--brown-surface);
+      border: 1px solid var(--brown-border);
+      border-radius: 6px;
+      padding: 8px 10px;
+      text-align: center;
+    }
+    .tile-label { font-size: 10px; color: var(--text-brown); display: block; font-weight: 600; margin-bottom: 2px; }
+    .tile-val { font-size: 20px; font-weight: 800; }
+
+    /* =========================================================
+       PAGE 2: MAP & SIMULATION
+       ========================================================= */
+    .map-page-layout {
+      display: grid;
+      grid-template-columns: 1.65fr 1fr;
+      gap: 12px;
+      flex: 1;
+      min-height: 0;
+    }
+    .map-pane-left {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 0;
+    }
+    .map-container {
+      flex: 1;
+      background: #0a1012;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+      min-height: 380px;
+    }
+    #map-viewport { width: 100%; height: 100%; z-index: 1; }
+
+    .map-floating-route-banner {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      z-index: 10;
+      background: rgba(12, 26, 30, 0.94);
+      backdrop-filter: blur(8px);
+      border: 1px solid #2a5561;
+      border-radius: 8px;
+      padding: 8px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 4px 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.55);
+    }
+    .route-banner-info { display: flex; align-items: center; gap: 8px; font-size: 12px; flex: 1 1 560px; min-width: 0; flex-wrap: wrap; }
+    .route-status-tag {
+      background: var(--green-pill-bg);
+      color: var(--green-bright);
+      border: 1px solid var(--green-primary);
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    #banner-route-text { line-height: 1.35; }
+    #banner-recalc-stat { white-space: nowrap; }
+
+    .map-floating-actions {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .map-legend-box {
+      background: rgba(18, 24, 26, 0.94);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--brown-border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 11px;
+      color: var(--text-brown);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-line { width: 18px; height: 3px; border-radius: 2px; }
+
+    .map-layer-toggles {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      z-index: 10;
+      background: rgba(18, 24, 26, 0.94);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--brown-border);
+      border-radius: 6px;
+      padding: 6px 10px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      max-width: calc(100% - 24px);
+    }
+    .layer-btn {
+      background: var(--brown-surface);
+      border: 1px solid var(--brown-border);
+      color: var(--text-brown);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .layer-btn.active {
+      background: var(--green-primary);
+      color: var(--text-white);
+      border-color: var(--green-bright);
+      box-shadow: 0 0 10px var(--green-glow);
+    }
+
+    /* Simulation Control Sandbox */
+    .sim-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .sim-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .sim-title { font-size: 12px; font-weight: 800; color: var(--text-white); text-transform: uppercase; }
+    .preset-group { display: flex; gap: 6px; flex-wrap: wrap; }
+    .preset-btn {
+      background: var(--brown-surface);
+      border: 1px solid var(--brown-border);
+      color: var(--text-brown);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .preset-btn:hover { background: var(--brown-border); color: #fff; }
+    .preset-btn.active {
+      background: var(--brown-amber);
+      color: var(--text-white);
+      border-color: #f59e0b;
+      box-shadow: 0 0 10px var(--brown-glow);
+    }
+
+    .slider-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+    .slider-block { display: flex; flex-direction: column; gap: 4px; }
+    .slider-label-row { display: flex; justify-content: space-between; font-size: 11px; }
+    .slider-label { color: var(--text-muted); font-weight: 600; }
+    .slider-val { color: var(--text-cream); font-weight: 700; font-family: monospace; }
+    input[type=range] {
+      width: 100%;
+      height: 5px;
+      border-radius: 3px;
+      background: #1e3036;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: var(--green-bright);
+      cursor: pointer;
+      box-shadow: 0 0 8px var(--green-bright);
+      border: 1px solid #ffffff;
+    }
+
+    /* Facilities Directory List Pane */
+    .facilities-pane {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-gutter: stable;
+    }
+    .facilities-pane .reports-scroll-container {
+      flex: 0 0 auto;
+      overflow: visible;
+      padding-right: 0;
+    }
+    .route-planner-card {
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .route-planner-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .route-planner-sub { font-size: 9px; color: var(--text-brown); margin-top: 2px; }
+    .route-planner-fields { display: flex; flex-direction: column; gap: 6px; }
+    .route-planner-field { display: flex; flex-direction: column; gap: 3px; }
+    .route-planner-field label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-brown); font-weight: 700; }
+    .route-planner-select {
+      width: 100%;
+      background: #0f191c;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--text-white);
+      font-size: 11px;
+      padding: 5px 6px;
+      outline: none;
+    }
+    .route-planner-select:focus { border-color: var(--green-bright); }
+    .route-planner-actions { display: flex; gap: 6px; }
+    .route-planner-actions .btn-action { flex: 1; padding: 5px 8px; font-size: 10px; }
+    .route-result { font-size: 10.5px; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px; }
+    .route-result-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .route-result-distance { font-family: monospace; font-weight: 800; color: var(--text-white); font-size: 12px; }
+    .route-result-line { display: flex; justify-content: space-between; gap: 8px; }
+    .route-result-line strong { color: var(--text-white); font-family: monospace; }
+    .route-result-warning { color: #f59e0b; font-size: 9.5px; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .route-result-error { color: #ef4444; font-size: 10px; line-height: 1.4; }
+    .route-result-note { color: var(--text-muted); font-size: 9.5px; line-height: 1.35; }
+    .route-result-disclaimer { color: var(--text-dim); font-size: 9px; line-height: 1.35; border-top: 1px dashed var(--border); padding-top: 5px; }
+    .facility-card-item {
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      transition: all 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .facility-card-item:hover {
+      border-color: var(--border-light);
+      background: var(--card-hover);
+    }
+
+    /* =========================================================
+       PAGE 3: REPORTS & OPERATIONS
+       ========================================================= */
+    .reports-page-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr 1fr;
+      gap: 12px;
+      flex: 1;
+      min-height: 0;
+    }
+    .reports-column {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 0;
+    }
+    .reports-col-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .reports-col-title {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--text-white);
+      letter-spacing: 0.04em;
+    }
+    .reports-scroll-container {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-right: 4px;
+    }
+
+    /* Decision Support Cards */
+    .decision-card {
+      background: var(--card-inner);
+      border-radius: 8px;
+      padding: 12px;
+      border-left: 4px solid var(--green-primary);
+      border-top: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .decision-card.severity-critical { border-left-color: var(--accent-red); background: rgba(239, 68, 68, 0.05); }
+    .decision-card.severity-high { border-left-color: var(--brown-amber); background: rgba(199, 124, 9, 0.06); }
+    .decision-card.severity-medium { border-left-color: var(--green-primary); }
+    .decision-card.status-approved { opacity: 0.65; border-left-color: #33bfd6; }
+    .dec-header { display: flex; justify-content: space-between; align-items: flex-start; }
+    .dec-title { font-size: 12px; font-weight: 700; color: var(--text-white); }
+    .dec-badge { font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
+    .badge-critical { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); border: 1px solid var(--accent-red); }
+    .badge-high { background: var(--brown-pill-bg); color: #fde68a; border: 1px solid var(--brown-amber); }
+    .badge-medium { background: var(--green-pill-bg); color: var(--green-bright); border: 1px solid var(--green-primary); }
+    .badge-approved { background: rgba(51, 191, 214, 0.2); color: #33bfd6; border: 1px solid #33bfd6; }
+    .dec-desc { font-size: 11px; color: var(--text-brown); line-height: 1.4; }
+    .dec-impact { font-size: 10px; color: var(--text-muted); font-family: monospace; }
+    .dec-actions { display: flex; gap: 6px; margin-top: 4px; justify-content: flex-end; }
+
+    /* Outstanding Requests Cards */
+    .request-card {
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .req-header { display: flex; justify-content: space-between; align-items: baseline; }
+    .req-id { font-family: monospace; font-size: 11px; font-weight: 800; color: var(--text-white); }
+    .req-urgency { font-size: 9px; font-weight: 800; padding: 1px 5px; border-radius: 3px; }
+    .req-requester { font-size: 12px; font-weight: 700; color: var(--text-white); }
+    .req-location { font-size: 10px; color: var(--text-brown); }
+    .req-need { font-size: 11px; color: var(--text-ivory); }
+    .req-match-box {
+      background: var(--brown-surface);
+      border: 1px solid var(--brown-border);
+      padding: 6px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+    }
+    .match-pending { border-color: var(--brown-amber); color: #fde68a; }
+    .match-assigned { border-color: var(--green-primary); color: var(--green-bright); }
+    .match-dispatched { border-color: #1fa9b8; color: #1fa9b8; }
+
+    /* Verification Summary Box */
+    .vrf-summary-box {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      background: var(--card-inner);
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .vrf-stat { display: flex; flex-direction: column; gap: 2px; }
+    .vrf-stat-label { font-size: 10px; color: var(--text-brown); font-weight: 600; }
+    .vrf-stat-value { font-size: 12px; font-weight: 800; color: var(--text-white); }
+
+    /* Audit Log Stream */
+    .audit-filter-row { display: flex; gap: 4px; flex-wrap: wrap; }
+    .audit-filter-btn {
+      background: var(--brown-surface);
+      border: 1px solid var(--brown-border);
+      color: var(--text-brown);
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .audit-filter-btn.active {
+      background: var(--green-primary);
+      border-color: var(--green-bright);
+      color: #fff;
+    }
+    .audit-log-stream {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 10px;
+      padding-right: 4px;
+    }
+    .audit-entry {
+      background: var(--card-inner);
+      border-left: 3px solid var(--border);
+      padding: 6px 8px;
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .audit-entry-top { display: flex; justify-content: space-between; color: var(--text-muted); font-size: 9px; }
+    .audit-cat { font-weight: 700; text-transform: uppercase; }
+    .audit-time { font-family: monospace; }
+    .audit-hash { font-family: monospace; color: var(--text-brown); font-size: 9px; }
+
+    /* =========================================================
+       PAGE 5: COMMUNITY REQUESTS
+       ========================================================= */
+    .community-page-grid {
+      display: grid;
+      grid-template-columns: 0.9fr 1.3fr;
+      gap: 12px;
+      flex: 1;
+      min-height: 0;
+    }
+    .community-form-pane, .community-board-pane {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 0;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    .form-label { font-size: 11px; font-weight: 700; color: var(--text-brown); text-transform: uppercase; }
+    .form-input, .form-select {
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      color: var(--text-white);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+    .form-input:focus, .form-select:focus { border-color: var(--green-bright); }
+    .community-request-tile {
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+    .community-request-tile:hover {
+      border-color: var(--border-light);
+      background: var(--card-hover);
+    }
+
+    /* Common Buttons */
+    .btn-action {
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+    .btn-approve { background: var(--green-primary); color: #fff; }
+    .btn-approve:hover { background: #128aa4; box-shadow: 0 0 10px var(--green-glow); }
+    .btn-dismiss { background: var(--brown-surface); color: var(--text-brown); border: 1px solid var(--brown-border); }
+    .btn-dismiss:hover { background: #2b3a40; color: #fff; }
+    .btn-map-view { background: var(--brown-surface); color: var(--text-cream); border: 1px solid var(--brown-border); }
+    .btn-map-view:hover { background: var(--brown-border); color: #fff; }
+
+    /* Toast Notifications */
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+    .toast {
+      background: rgba(17, 26, 29, 0.95);
+      border-left: 4px solid var(--green-bright);
+      border-top: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-size: 12px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+      transition: all 0.3s ease;
+      backdrop-filter: blur(8px);
+      pointer-events: auto;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.6; transform: scale(0.95); }
+      50% { opacity: 1; transform: scale(1.15); }
+      100% { opacity: 0.6; transform: scale(0.95); }
+    }
+
+    /* =========================================================
+       PAGE 4: FACILITY & RESOURCE COORDINATION
+       ========================================================= */
+    .coord-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .coord-kpi {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .coord-kpi-label {
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-brown);
+    }
+    .coord-kpi-value {
+      font-size: 21px;
+      font-weight: 800;
+      line-height: 1.1;
+      color: var(--text-white);
+    }
+    .coord-kpi-sub {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+    .coord-page-grid {
+      display: grid;
+      grid-template-columns: 1.08fr 1fr 1.12fr;
+      gap: 12px;
+      flex: 1;
+      min-height: 0;
+    }
+    .coord-page-grid .reports-column {
+      padding: 12px;
+      gap: 8px;
+    }
+    .coord-intake-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+      padding: 9px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--card-inner);
+      flex-shrink: 0;
+    }
+    .coord-intake-form .form-group { gap: 3px; }
+    .coord-intake-form .form-label { font-size: 9px; }
+    .coord-intake-form .form-input,
+    .coord-intake-form .form-select {
+      padding: 5px 7px;
+      font-size: 10px;
+      width: 100%;
+    }
+    .coord-intake-wide { grid-column: 1 / -1; }
+    .coord-card {
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-left: 3px solid #4f8b9b;
+      border-radius: 8px;
+      padding: 9px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .coord-card-unavailable {
+      border-left-color: var(--accent-red);
+      background: rgba(239, 68, 68, 0.045);
+    }
+    .coord-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .coord-card-title {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-white);
+      line-height: 1.25;
+      margin-top: 2px;
+    }
+    .coord-type-tag {
+      font-size: 8px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--green-bright);
+      background: var(--green-pill-bg);
+      border-radius: 3px;
+      padding: 1px 5px;
+    }
+    .coord-status-tag {
+      font-size: 8px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      border: 1px solid;
+      border-radius: 3px;
+      padding: 2px 5px;
+      white-space: nowrap;
+    }
+    .coord-meta-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      font-size: 9px;
+      color: var(--text-brown);
+    }
+    .coord-capacity-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+      background: var(--brown-surface);
+      border-radius: 5px;
+      padding: 6px;
+      font-size: 9px;
+    }
+    .coord-capacity-grid > div,
+    .coord-stock-row > div {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      min-width: 0;
+    }
+    .coord-capacity-grid strong,
+    .coord-stock-row strong {
+      font-size: 10px;
+      color: var(--text-white);
+    }
+    .coord-mini-label {
+      font-size: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--text-muted);
+    }
+    .coord-stock-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      font-size: 9px;
+    }
+    .coord-stock-bar {
+      display: flex;
+      height: 4px;
+      border-radius: 3px;
+      background: var(--brown-surface);
+      overflow: hidden;
+    }
+    .coord-stock-bar > div { height: 100%; }
+    .coord-note {
+      font-size: 9px;
+      line-height: 1.45;
+      color: var(--text-muted);
+    }
+    .coord-note strong { color: var(--text-brown); }
+    .coord-assigned {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      background: rgba(51, 191, 214, 0.08);
+      border: 1px solid rgba(51, 191, 214, 0.35);
+      border-radius: 4px;
+      padding: 5px 7px;
+      font-size: 9px;
+      color: var(--text-muted);
+    }
+    .coord-assigned strong { color: #33bfd6; }
+    .coord-alert {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.45);
+      border-radius: 4px;
+      padding: 5px 7px;
+      font-size: 9px;
+      font-weight: 700;
+      color: #fca5a5;
+    }
+    .coord-footer-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      font-size: 9px;
+      color: var(--text-muted);
+    }
+
+    /* Demo tools, governance and guided walkthrough */
+    .header-btn {
+      border: 1px solid var(--border-light);
+      background: var(--card-inner);
+      color: var(--text-cream);
+      border-radius: 6px;
+      padding: 7px 10px;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+    .header-btn:hover { border-color: var(--green-bright); color: var(--text-white); }
+    .header-btn-accent { background: rgba(51, 191, 214, 0.12); border-color: #33bfd6; color: #33bfd6; }
+    .governance-chip {
+      border: 1px solid rgba(51, 191, 214, 0.45);
+      background: rgba(51, 191, 214, 0.1);
+      color: #33bfd6;
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 9px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .report-header-actions { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    body[data-role="auditor"] .header-btn-accent { opacity: 0.6; }
+    .coord-intake-note {
+      border: 1px dashed var(--border-light);
+      background: rgba(51, 191, 214, 0.05);
+      border-radius: 6px;
+      padding: 7px 9px;
+      font-size: 9px;
+      line-height: 1.45;
+      color: var(--text-muted);
+    }
+    .demo-menu {
+      position: fixed;
+      top: 76px;
+      right: 18px;
+      z-index: 2400;
+      width: 310px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      padding: 12px;
+      background: #12181a;
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+    }
+    .demo-menu[hidden], .demo-guide-panel[hidden], .modal-backdrop[hidden] { display: none; }
+    .demo-menu-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .demo-menu-head button {
+      border: 0;
+      background: transparent;
+      color: var(--text-brown);
+      font-size: 9px;
+      cursor: pointer;
+    }
+    .demo-role-label {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-brown);
+    }
+    .demo-role-select { width: 100%; padding: 7px; border-radius: 6px; border: 1px solid var(--border); background: var(--card-inner); color: var(--text-white); font-size: 11px; }
+    .demo-menu-item {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 8px 9px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--card-inner);
+      color: var(--text-cream);
+      font-size: 11px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .demo-menu-item:hover { border-color: var(--green-bright); color: var(--text-white); }
+    .demo-menu-danger { color: #fca5a5; border-color: rgba(239, 68, 68, 0.4); }
+    .demo-menu-note { font-size: 9px; line-height: 1.4; color: var(--text-dim); }
+    .demo-guide-panel {
+      position: fixed;
+      left: 18px;
+      bottom: 18px;
+      z-index: 2400;
+      width: min(370px, calc(100vw - 36px));
+      padding: 14px;
+      background: #12181a;
+      border: 1px solid #33bfd6;
+      border-radius: 10px;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.6);
+    }
+    .demo-guide-top { display: flex; justify-content: space-between; align-items: center; color: #33bfd6; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; }
+    .demo-guide-top button { border: 0; background: transparent; color: var(--text-brown); font-size: 9px; cursor: pointer; }
+    .demo-guide-panel h3 { font-size: 15px; margin: 8px 0 5px; color: var(--text-white); }
+    .demo-guide-panel p { font-size: 11px; line-height: 1.5; color: var(--text-muted); }
+    .demo-guide-actions { display: flex; gap: 6px; justify-content: flex-end; margin-top: 12px; }
+    .demo-guide-actions button { border: 1px solid var(--border-light); background: var(--card-inner); color: var(--text-cream); border-radius: 6px; padding: 6px 10px; font-size: 10px; font-weight: 700; cursor: pointer; }
+    .demo-guide-actions .demo-guide-next { background: #33bfd6; border-color: #33bfd6; color: #061114; }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 2500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(4, 9, 11, 0.78);
+      backdrop-filter: blur(4px);
+    }
+    .modal-card {
+      position: relative;
+      width: min(520px, 100%);
+      max-height: 90vh;
+      overflow-y: auto;
+      background: #12181a;
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.65);
+    }
+    .modal-card-wide { width: min(820px, 100%); }
+    .modal-close { position: absolute; top: 12px; right: 12px; border: 1px solid var(--border); background: var(--card-inner); color: var(--text-brown); border-radius: 5px; padding: 4px 7px; font-size: 9px; cursor: pointer; }
+    .modal-kicker { font-size: 9px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #33bfd6; }
+    .modal-card h2 { font-size: 22px; margin: 6px 0 8px; color: var(--text-white); }
+    .modal-lede { font-size: 12px; line-height: 1.55; color: var(--text-muted); }
+    .pilot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+    .pilot-grid > div { border: 1px solid var(--border); border-radius: 8px; padding: 10px; background: var(--card-inner); }
+    .pilot-grid h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-cream); margin-bottom: 4px; }
+    .pilot-grid p { font-size: 10px; line-height: 1.5; color: var(--text-muted); }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+    .guided-highlight { outline: 2px solid #33bfd6; outline-offset: 3px; animation: guidePulse 1.6s ease-in-out infinite; }
+    @keyframes guidePulse { 0%, 100% { outline-color: rgba(51, 191, 214, 0.45); } 50% { outline-color: #33bfd6; } }
+
+    /* Responsive layout for tablets and resident phones */
+    @media (max-width: 1180px) {
+      body { height: auto; min-height: 100vh; overflow-y: auto; }
+      .top-bar { flex-wrap: wrap; }
+      .status-group { flex-wrap: wrap; }
+      .page-view-container { overflow: visible; }
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .dashboard-pillars-grid, .reports-page-grid, .community-page-grid, .coord-page-grid, .map-page-layout { grid-template-columns: 1fr; }
+      .reports-column, .coord-page-grid .reports-column { min-height: 420px; }
+      .pillar-column { overflow: visible; }
+      .map-pane-left { min-height: 58vh; }
+      .map-container { min-height: 48vh; }
+      .reports-scroll-container { max-height: 55vh; }
+      .demo-menu { top: 116px; }
+    }
+    @media (max-width: 700px) {
+      body { padding: 8px; gap: 8px; }
+      .top-bar { padding: 8px; gap: 8px; border-radius: 8px; }
+      .brand-section { width: 100%; }
+      .brand-title { font-size: 13px; line-height: 1.25; }
+      .brand-sub { font-size: 9px; }
+      .brand-logo img { height: 34px; }
+      .status-group { width: 100%; justify-content: flex-start; gap: 6px; }
+      .status-group .clock-display { font-size: 10px; }
+      .emergency-pill { font-size: 9px; padding: 5px 8px; }
+      .header-btn { padding: 6px 8px; font-size: 9px; }
+      .kpi-grid { grid-template-columns: 1fr; gap: 8px; }
+      .dashboard-pillars-grid, .reports-page-grid, .community-page-grid, .coord-page-grid, .map-page-layout { gap: 8px; }
+      .page-view-container { gap: 8px; }
+      .op-card, .reports-column, .community-form-pane, .community-board-pane { padding: 10px; border-radius: 8px; }
+      .reports-column, .coord-page-grid .reports-column { min-height: 360px; }
+      .roads-table { font-size: 10px; min-width: 620px; }
+      .op-card:has(.roads-table) { overflow-x: auto; }
+      .route-planner-fields { gap: 5px; }
+      .pilot-grid { grid-template-columns: 1fr; }
+      .demo-menu { top: 10px; right: 10px; left: 10px; width: auto; max-height: 88vh; overflow-y: auto; }
+      .demo-guide-panel { left: 8px; bottom: 8px; width: calc(100vw - 16px); }
+      .modal-backdrop { padding: 8px; align-items: flex-end; }
+      .modal-card { max-height: 92vh; padding: 16px; }
+      .modal-card h2 { font-size: 18px; }
+      .audit-log-stream { max-height: 45vh; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .guided-highlight { animation: none; }
     }
   </style>
 </head>
 <body>
-  <div id="app">
-    <!-- Map container sedia untuk disambung kepada UI baharu -->
-    <div id="map-viewport"></div>
+
+  <!-- Left Slide-Out Navigation Bar -->
+  <div class="side-nav-backdrop" id="side-nav-backdrop"></div>
+  <aside class="side-nav" id="side-nav" aria-hidden="true">
+    <div class="side-nav-header">
+      <div class="side-nav-logo">
+        <img src="Image/naditown-logo.png" alt="NADITOWN" />
+      </div>
+      <button class="side-nav-close" id="side-nav-close" aria-label="Close navigation">&times;</button>
+    </div>
+
+    <div class="side-nav-section-label">Command Navigation</div>
+    <nav class="nav-tabs-group">
+      <button class="nav-page-btn active" data-page="page-dashboard">
+        <span>📊 Operations Dashboard</span>
+      </button>
+      <button class="nav-page-btn" data-page="page-map">
+        <span>🗺️ Tactical Map &amp; Simulation</span>
+      </button>
+      <button class="nav-page-btn" data-page="page-reports">
+        <span>📋 Reports &amp; Operations</span>
+        <span class="nav-page-badge" id="nav-reports-badge">3</span>
+      </button>
+      <button class="nav-page-btn" data-page="page-coordination">
+        <span>🏥 Facility &amp; Resource Coordination</span>
+        <span class="nav-page-badge" id="nav-coordination-badge">3</span>
+      </button>
+      <button class="nav-page-btn" data-page="page-community">
+        <span>🤝 Community Requests</span>
+        <span class="nav-page-badge" id="nav-community-badge">3</span>
+      </button>
+    </nav>
+
+    <div class="side-nav-status">
+      <div class="opr-pill">PKOB Command Post: <strong>OPR-8841</strong></div>
+      <div class="clock-display" id="side-nav-clock">--:--:-- UTC+8</div>
+      <div style="font-size:10px; color:var(--text-dim); text-align:center;">Bandar Elmina &bull; Sime Darby Property</div>
+    </div>
+  </aside>
+
+  <!-- Top Navigation Header -->
+  <header class="top-bar">
+    <div class="brand-section">
+      <button class="hamburger-btn" id="sidebar-toggle" aria-label="Open navigation" aria-expanded="false" aria-controls="side-nav">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="brand-logo">
+        <img src="Image/naditown-mark.png" alt="NADITOWN logo" />
+      </div>
+      <div>
+        <div class="brand-title">Adaptive Township Emergency Operating System</div>
+        <div class="brand-sub">Sime Darby Property &bull; Bandar Elmina (City of Elmina), Shah Alam</div>
+      </div>
+    </div>
+
+    <!-- Operational State & Live Clock -->
+    <div class="status-group">
+      <div class="emergency-pill" id="emergency-pill">
+        <span class="pulsing-dot"></span>
+        <span id="emergency-level-text">LEVEL 3: ORANGE ALERT</span>
+      </div>
+      <button class="header-btn header-btn-accent" id="btn-guided-demo" type="button">Guided demo</button>
+      <a class="header-btn" href="resident.html" target="_blank" rel="noopener">Resident SOS</a>
+      <button class="header-btn" id="btn-demo-menu" type="button" aria-expanded="false" aria-controls="demo-tools-menu">Demo tools</button>
+      <div class="clock-display" id="live-clock">--:--:-- UTC+8</div>
+    </div>
+  </header>
+
+  <div class="demo-menu" id="demo-tools-menu" hidden>
+    <div class="demo-menu-head">
+      <span>Command tools</span>
+      <button type="button" id="btn-demo-menu-close" aria-label="Close demo tools">Close</button>
+    </div>
+    <label class="demo-role-label" for="role-select">View as</label>
+    <select class="demo-role-select" id="role-select">
+      <option value="commander">Commander (approve + dispatch)</option>
+      <option value="operator">Operator (dispatch only)</option>
+      <option value="auditor">Auditor (read-only)</option>
+    </select>
+    <button type="button" class="demo-menu-item" data-demo-action="sitrep">Export situation report</button>
+    <button type="button" class="demo-menu-item" data-demo-action="pilot">Pilot and commercial brief</button>
+    <button type="button" class="demo-menu-item" data-demo-action="verify">Verify audit chain</button>
+    <a class="demo-menu-item" href="resident.html" target="_blank" rel="noopener">Open resident SOS (mobile)</a>
+    <button type="button" class="demo-menu-item demo-menu-danger" data-demo-action="reset">Reset demo data</button>
+    <div class="demo-menu-note">State is stored in this browser. Resident SOS requests sync through the local demo queue.</div>
   </div>
 
-  <!-- Main JavaScript App -->
-  <script type="module" src="/src/main.js"></script>
+  <!-- =========================================================
+       PAGE 1: DASHBOARD
+       Strictly isolates the 4 primary operational pillars:
+       1. Road Network Segments
+       2. Evacuation Shelter Capacity & Resources
+       3. Citizen Requests Summary
+       4. Route Recalculation Benchmark & Verification
+       ========================================================= -->
+  <section class="page-view-container active" id="page-dashboard">
+    
+    <!-- 4 Pillar KPI Summary Cards -->
+    <div class="kpi-grid">
+      <!-- Pillar 1: Road Network -->
+      <div class="kpi-card" style="--card-accent: var(--green-primary);">
+        <div class="kpi-header">
+          <span class="kpi-label">Road Network</span>
+          <span class="kpi-badge" id="kpi-road-badge" style="background: rgba(239, 68, 68, 0.15); color: var(--accent-red); border: 1px solid var(--accent-red);">1 Closed</span>
+        </div>
+        <div class="kpi-value-row">
+          <span class="kpi-value" id="kpi-open-roads">4</span>
+          <span class="kpi-unit">/ 6 Corridors Open</span>
+        </div>
+        <div class="kpi-subtext">
+          <span id="kpi-road-subtext">4 Clear &bull; 1 Hazard &bull; 1 Closed</span>
+          <span id="kpi-road-pct">67% Passable</span>
+        </div>
+        <div class="mini-progress-track">
+          <div class="mini-progress-fill" id="kpi-road-bar" style="width: 67%; background: var(--green-bright);"></div>
+        </div>
+      </div>
+
+      <!-- Pillar 2: Shelter Capacity & Resources -->
+      <div class="kpi-card" style="--card-accent: var(--green-bright);">
+        <div class="kpi-header">
+          <span class="kpi-label">Shelter Capacity &amp; Resources</span>
+          <span class="kpi-badge" style="background: var(--green-pill-bg); color: var(--green-bright); border: 1px solid var(--green-primary);" id="kpi-shelter-active">2 Active Shelters</span>
+        </div>
+        <div class="kpi-value-row">
+          <span class="kpi-value" id="kpi-shelter-pct">46.3%</span>
+          <span class="kpi-unit" id="kpi-shelter-counts">(648 / 1,400 Evacuees)</span>
+        </div>
+        <div class="kpi-resources-strip">
+          <span class="resource-badge" id="badge-food">🍱 MRE: 2,350</span>
+          <span class="resource-badge" id="badge-boats">🚤 Boats: 3 Standby</span>
+          <span class="resource-badge" id="badge-4x4">🚙 4x4: 5 Ready</span>
+        </div>
+        <div class="mini-progress-track">
+          <div class="mini-progress-fill" id="kpi-shelter-bar" style="width: 46%; background: var(--green-primary);"></div>
+        </div>
+      </div>
+
+      <!-- Pillar 3: Citizen Requests Pipeline -->
+      <div class="kpi-card" style="--card-accent: var(--brown-primary);">
+        <div class="kpi-header">
+          <span class="kpi-label">Citizen Requests</span>
+          <span class="kpi-badge" style="background: var(--brown-pill-bg); color: #fde68a; border: 1px solid var(--brown-amber);" id="kpi-req-badge">2 Pending</span>
+        </div>
+        <div class="kpi-value-row">
+          <span class="kpi-value" id="kpi-total-requests">6</span>
+          <span class="kpi-unit">Total Incident Requests</span>
+        </div>
+        <div class="kpi-subtext">
+          <span id="kpi-requests-breakdown">2 Pending &bull; 2 Matched &bull; 2 Dispatched</span>
+          <span id="kpi-match-rate">66.7% Matched</span>
+        </div>
+        <div class="mini-progress-track">
+          <div class="mini-progress-fill" id="kpi-requests-bar" style="width: 67%; background: var(--brown-primary);"></div>
+        </div>
+      </div>
+
+      <!-- Pillar 4: Route Optimization & Verification -->
+      <div class="kpi-card" style="--card-accent: var(--green-emerald);">
+        <div class="kpi-header">
+          <span class="kpi-label">Route Calculation &amp; Verification</span>
+          <span class="kpi-badge" style="background: var(--green-pill-bg); color: var(--green-emerald); border: 1px solid var(--green-primary);">Dijkstra Graph Engine</span>
+        </div>
+        <div class="kpi-value-row">
+          <span class="kpi-value" id="kpi-recalc-time">—</span>
+          <span class="kpi-unit">ms Graph Latency</span>
+        </div>
+        <div class="kpi-subtext">
+          <span id="kpi-route-hazard-count">Calculating route</span>
+          <span style="color: var(--green-bright);" id="kpi-verified-count">4 Triggers Verified</span>
+        </div>
+        <div class="mini-progress-track">
+          <div class="mini-progress-fill" style="width: 95%; background: var(--green-emerald);"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 Pillars Detailed Operational View -->
+    <div class="dashboard-pillars-grid">
+      <!-- Left Column: Pillar 1 (Road Segments Table) & Pillar 4 (Route Verification) -->
+      <div class="pillar-column">
+        
+        <!-- Pillar 1: Road Network Segments Corridor Status -->
+        <div class="op-card">
+          <div class="op-card-title">
+            <span>🛣️ Pillar 1: Road Network Segments &amp; Passability Status</span>
+            <span style="font-size:10px; color:var(--text-muted);">Real-Time Corridor Telemetry</span>
+          </div>
+          <table class="roads-table">
+            <thead>
+              <tr>
+                <th>Road Segment Name</th>
+                <th>Status</th>
+                <th>Water Depth</th>
+                <th>Passable For</th>
+                <th>Risk Rating</th>
+                <th>Operator Action</th>
+              </tr>
+            </thead>
+            <tbody id="dash-roads-table-body">
+              <!-- Populated via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pillar 4: Route Optimization & Verification Details -->
+        <div class="op-card">
+          <div class="op-card-title">
+            <span>⚡ Pillar 4: Route Calculation &amp; Mathematical Verification</span>
+            <span style="font-size:10px; color:#33bfd6;">Simulated Adaptive Reroute</span>
+          </div>
+          <div id="dash-route-benchmark">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Pillar 2 (Shelter Capacity) & Pillar 3 (Citizen Requests Summary) -->
+      <div class="pillar-column">
+        
+        <!-- Pillar 2: Evacuation Shelter Capacity & Logistics -->
+        <div class="op-card">
+          <div class="op-card-title">
+            <span>🏕️ Pillar 2: Evacuation Shelter (PPS) Capacity &amp; Logistics</span>
+            <span style="font-size:10px; color:var(--text-brown);">Welfare &amp; Intake Units</span>
+          </div>
+          <div class="shelter-cards-list" id="dash-shelter-cards">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+
+        <!-- Pillar 3: Citizen Incident Requests Overview -->
+        <div class="op-card">
+          <div class="op-card-title">
+            <span>🚨 Pillar 3: Citizen Incident Requests Summary</span>
+            <button class="btn-action btn-map-view" onclick="naditown.dashboard.switchPage('page-reports')" style="padding:2px 8px; font-size:10px;">
+              Open Operations Queue &rarr;
+            </button>
+          </div>
+          <div id="dash-requests-summary">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </section>
+
+  <!-- =========================================================
+       PAGE 2: MAP & SIMULATION
+       Includes:
+       1. Interactive Tactical Leaflet Map
+       2. Flood & Hydrology Simulation Controls (Sliders & Scenarios)
+       3. Facilities Directory / List
+       ========================================================= -->
+  <section class="page-view-container" id="page-map">
+    <div class="map-page-layout">
+      
+      <!-- Left: Tactical Map Viewport + Simulation Controls -->
+      <div class="map-pane-left">
+        
+        <!-- Interactive Leaflet Map Container -->
+        <div class="map-container">
+          
+          <!-- Route Overlay Banner -->
+          <div class="map-floating-route-banner" id="map-route-banner">
+            <div class="route-banner-info">
+              <span class="route-status-tag" id="banner-route-tag">SIMULATED ROUTE</span>
+              <span id="banner-route-text" style="color: #fff; font-weight: 600;">
+                Calculating simulated route...
+              </span>
+            </div>
+            <div>
+              <span style="font-size:11px; color: var(--text-cream); font-family:monospace;" id="banner-recalc-stat">Dijkstra engine initializing</span>
+            </div>
+          </div>
+
+          <!-- Leaflet Viewport -->
+          <div id="map-viewport"></div>
+
+          <!-- Map Legend -->
+          <div class="map-floating-actions">
+            <div class="map-legend-box">
+              <div class="legend-item"><div class="legend-line" style="background: var(--green-bright);"></div><span>Clear Road Status</span></div>
+              <div class="legend-item"><div class="legend-line" style="background: var(--brown-amber);"></div><span>Hazard Road Status</span></div>
+              <div class="legend-item"><div class="legend-line" style="background: #ef4444; border-top: 2px dashed #fff;"></div><span>Closed Road Status</span></div>
+              <div class="legend-item"><div class="legend-line" style="background: var(--green-emerald); border-top: 2px solid #fff;"></div><span>Road-Following Route (OpenStreetMap)</span></div>
+              <div class="legend-item"><div class="legend-line" style="background: #6b8a93; border-top: 2px dotted #6b8a93;"></div><span>Simulated Local Connector</span></div>
+              <div class="legend-item"><span style="color: var(--green-bright);">●</span><span>Evacuation Shelters &amp; Hospitals</span></div>
+              <div class="legend-item"><span style="color: var(--brown-primary);">●</span><span>IoT Hydrology Telemetry Sensors</span></div>
+              <div class="legend-item" style="margin-top: 3px; font-size: 9px; line-height: 1.35;"><span id="road-geometry-legend-note" style="color: #93aab2;">Road status overlay: loading OSM alignment...</span></div>
+            </div>
+          </div>
+
+          <!-- Map Layer Controls -->
+          <div class="map-layer-toggles">
+            <button class="layer-btn active" id="layer-btn-floodZones">Flood</button>
+            <button class="layer-btn active" id="layer-btn-roads">Roads</button>
+            <button class="layer-btn active" id="layer-btn-pps">Facilities</button>
+            <button class="layer-btn active" id="layer-btn-sensors">Sensors</button>
+            <button class="layer-btn active" id="layer-btn-route">Route</button>
+            <span style="color: var(--brown-border-light);">|</span>
+            <button class="layer-btn" id="map-style-toggle" title="Switch Map Style (Satellite / Street / Dark)">🛰️ Satellite</button>
+            <button class="layer-btn" id="map-reset-btn" title="Reset Map View">🔄 Reset</button>
+          </div>
+        </div>
+
+        <!-- Hydrology Simulation Sandbox -->
+        <div class="sim-panel">
+          <div class="sim-header">
+            <div class="sim-title">
+              <span>⚙️ Hydrology Simulation &amp; Road Closure Sandbox (Operator)</span>
+            </div>
+            <div class="preset-group">
+              <button class="preset-btn" data-preset="normal">☀️ 1. Normal</button>
+              <button class="preset-btn active" data-preset="sector2_flood">🌧️ 2. Sector 2 Flash Flood</button>
+              <button class="preset-btn" data-preset="monsoon_deluge">⛈️ 3. Monsoon Deluge</button>
+              <button class="preset-btn" data-preset="max_evacuation">🚨 4. Maximum Evacuation</button>
+            </div>
+          </div>
+
+          <!-- Interactive Sliders -->
+          <div class="slider-grid">
+            <!-- Slider 1: Rainfall -->
+            <div class="slider-block">
+              <div class="slider-label-row">
+                <span class="slider-label">🌧️ Rainfall Rate</span>
+                <span class="slider-val" id="val-rainfall">68 mm/h (Heavy)</span>
+              </div>
+              <input type="range" id="slider-rainfall" min="0" max="150" step="5" value="68" />
+            </div>
+
+            <!-- Slider 2: Water Surge -->
+            <div class="slider-block">
+              <div class="slider-label-row">
+                <span class="slider-label">🌊 Water Surge Rise</span>
+                <span class="slider-val" id="val-surge">+0.95 m (Surge Rise)</span>
+              </div>
+              <input type="range" id="slider-surge" min="0.0" max="2.5" step="0.05" value="0.95" />
+            </div>
+
+            <!-- Slider 3: Risk Multiplier -->
+            <div class="slider-block">
+              <div class="slider-label-row">
+                <span class="slider-label">⚠️ Flood Risk Multiplier</span>
+                <span class="slider-val" id="val-risk">1.4x (Standard)</span>
+              </div>
+              <input type="range" id="slider-risk" min="1.0" max="2.5" step="0.1" value="1.4" />
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right: Facilities Directory Panel -->
+      <div class="facilities-pane">
+        <!-- Adaptive Route Planner -->
+        <div class="route-planner-card">
+          <div class="route-planner-head">
+            <div>
+              <div class="reports-col-title">🧭 Adaptive Route Planner</div>
+              <div class="route-planner-sub">Closure-aware Dijkstra with OpenStreetMap road geometry</div>
+            </div>
+            <span class="route-status-tag" id="route-engine-badge">Dijkstra</span>
+          </div>
+          <div class="route-planner-fields">
+            <div class="route-planner-field">
+              <label for="route-origin-select">Origin</label>
+              <select id="route-origin-select" class="route-planner-select"></select>
+            </div>
+            <div class="route-planner-field">
+              <label for="route-destination-select">Destination</label>
+              <select id="route-destination-select" class="route-planner-select"></select>
+            </div>
+            <div class="route-planner-field">
+              <label for="route-preference">Route priority</label>
+              <select id="route-preference" class="route-planner-select">
+                <option value="safest">Safest - avoid hazard corridors</option>
+                <option value="fastest">Fastest - travel time only</option>
+              </select>
+            </div>
+          </div>
+          <div class="route-planner-actions">
+            <button id="route-calculate-btn" class="btn-action btn-approve">Calculate Road-Following Route</button>
+          </div>
+          <div class="route-result" id="route-planner-result">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+
+        <div class="reports-col-header">
+          <div>
+            <div class="reports-col-title">🏢 Township Facilities Directory</div>
+            <div style="font-size:10px; color:var(--text-brown);">Shelters, Healthcare, Logistics &amp; Command Posts</div>
+          </div>
+        </div>
+
+        <!-- Filter Buttons for Facilities -->
+        <div class="audit-filter-row" id="fac-filter-group">
+          <button class="audit-filter-btn active" data-fac-filter="all">All Facilities</button>
+          <button class="audit-filter-btn" data-fac-filter="pps">Evacuation (PPS)</button>
+          <button class="audit-filter-btn" data-fac-filter="medical">Healthcare</button>
+          <button class="audit-filter-btn" data-fac-filter="responder">First Responders</button>
+          <button class="audit-filter-btn" data-fac-filter="logistics">Logistics Depots</button>
+        </div>
+
+        <!-- Scrollable Facilities List -->
+        <div class="reports-scroll-container" id="map-facilities-list-body">
+          <!-- Populated via JS -->
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =========================================================
+       PAGE 3: REPORTS & OPERATIONS
+       Includes:
+       1. Decision Support System (Suggestions & Action Buttons)
+       2. Outstanding Requests Queue (Matching Resources to Requests)
+       3. Verification & Audit Trail (Logs, Triggers, Recalc Time, Approvals)
+       ========================================================= -->
+  <section class="page-view-container" id="page-reports">
+    <div class="reports-page-grid">
+      
+      <!-- Column 1: Decision Support System -->
+      <div class="reports-column">
+        <div class="reports-col-header">
+          <div>
+            <div class="reports-col-title">🧠 Decision Support System</div>
+            <div style="font-size:10px; color:var(--text-brown);">Individual commander authorization required</div>
+          </div>
+          <span class="governance-chip">4-eyes approval</span>
+        </div>
+
+        <div class="reports-scroll-container" id="decisions-list-container">
+          <!-- Populated via JS -->
+        </div>
+      </div>
+
+      <!-- Column 2: Outstanding Operations Queue -->
+      <div class="reports-column">
+        <div class="reports-col-header">
+          <div>
+            <div class="reports-col-title">📋 Outstanding Operations Queue</div>
+            <div style="font-size:10px; color:var(--text-brown);">Matching Emergency Relief Resources to Citizen Calls</div>
+          </div>
+          <button class="btn-action btn-approve" id="btn-auto-match-all" style="padding:4px 8px; font-size:10px;">
+            ⚡ Auto-Match All
+          </button>
+        </div>
+
+        <!-- Filters for Requests -->
+        <div class="audit-filter-row" id="request-filter-group">
+          <button class="audit-filter-btn active" data-req-filter="all">All</button>
+          <button class="audit-filter-btn" data-req-filter="attention">Needs Attention</button>
+          <button class="audit-filter-btn" data-req-filter="pending">Pending</button>
+          <button class="audit-filter-btn" data-req-filter="matched">Matched</button>
+          <button class="audit-filter-btn" data-req-filter="dispatched">Dispatched</button>
+        </div>
+
+        <div class="reports-scroll-container" id="requests-list-container">
+          <!-- Populated via JS -->
+        </div>
+      </div>
+
+      <!-- Column 3: Verification & Audit Trail -->
+      <div class="reports-column">
+        <div class="reports-col-header">
+          <div>
+            <div class="reports-col-title">🛡️ Verification &amp; Audit Trail</div>
+            <div style="font-size:10px; color:var(--text-brown);">SHA-256 hash chain, triggers and benchmark metrics</div>
+          </div>
+          <div class="report-header-actions">
+            <button class="btn-action btn-map-view" id="btn-verify-audit" style="padding:4px 8px; font-size:10px;">Verify chain</button>
+            <button class="btn-action btn-map-view" id="btn-export-audit" style="padding:4px 8px; font-size:10px;">Export JSON</button>
+          </div>
+        </div>
+
+        <!-- Verification Summary KPIs -->
+        <div class="vrf-summary-box">
+          <div class="vrf-stat">
+            <span class="vrf-stat-label">Routing Calculation Latency</span>
+            <span class="vrf-stat-value" id="vrf-calc-time" style="color: var(--green-bright);">— ms (Dijkstra)</span>
+          </div>
+          <div class="vrf-stat">
+            <span class="vrf-stat-label">Resource Match Ratio</span>
+            <span class="vrf-stat-value" id="vrf-match-ratio" style="color: var(--text-cream);">6 / 8 Requests (75%)</span>
+          </div>
+          <div class="vrf-stat">
+            <span class="vrf-stat-label">Operator Authorized Actions</span>
+            <span class="vrf-stat-value" id="vrf-approvals-count" style="color: var(--green-emerald);">2 Authorized</span>
+          </div>
+          <div class="vrf-stat">
+            <span class="vrf-stat-label">Audit Chain</span>
+            <span class="vrf-stat-value" id="vrf-chain-status" style="color:var(--green-emerald);">SHA-256 - verifying</span>
+          </div>
+          <div class="vrf-stat">
+            <span class="vrf-stat-label">Chain Head</span>
+            <span class="vrf-stat-value" id="vrf-hash-val" title="" style="font-family: monospace; font-size:10px; color:var(--text-brown); overflow-wrap:anywhere;">GENESIS</span>
+          </div>
+        </div>
+
+        <!-- Filter Row for Audit Logs -->
+        <div class="audit-filter-row" id="audit-filter-group">
+          <button class="audit-filter-btn active" data-log-filter="ALL">All Logs</button>
+          <button class="audit-filter-btn" data-log-filter="TELEMETRY">Telemetry</button>
+          <button class="audit-filter-btn" data-log-filter="REROUTE">Reroute</button>
+          <button class="audit-filter-btn" data-log-filter="APPROVAL">Approvals</button>
+          <button class="audit-filter-btn" data-log-filter="DISPATCH">Dispatches</button>
+        </div>
+
+        <!-- Chronological Event Log Stream -->
+        <div class="audit-log-stream" id="audit-log-stream">
+          <!-- Populated via JS -->
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =========================================================
+       PAGE 4: FACILITY & RESOURCE COORDINATION
+       Includes:
+       1. Declared facility availability and approved shelter status
+       2. Declared resource stock, allocations, and availability
+       3. Request matching, shortages, dispatch, and release controls
+       ========================================================= -->
+  <section class="page-view-container" id="page-coordination">
+    <div class="coord-summary-grid">
+      <div class="coord-kpi">
+        <span class="coord-kpi-label">Available Facilities</span>
+        <span class="coord-kpi-value" id="coord-kpi-available-facilities" style="color:#33bfd6;">—</span>
+        <span class="coord-kpi-sub" id="coord-kpi-available-sub">Approved shelters and intake capacity</span>
+      </div>
+      <div class="coord-kpi">
+        <span class="coord-kpi-label">Unavailable Facilities</span>
+        <span class="coord-kpi-value" id="coord-kpi-unavailable" style="color:#ef4444;">—</span>
+        <span class="coord-kpi-sub">Offline, full, or not accepting intake</span>
+      </div>
+      <div class="coord-kpi">
+        <span class="coord-kpi-label">Allocated Units</span>
+        <span class="coord-kpi-value" id="coord-kpi-allocated" style="color:#f59e0b;">—</span>
+        <span class="coord-kpi-sub">Committed against declared stock</span>
+      </div>
+      <div class="coord-kpi">
+        <span class="coord-kpi-label">Requests Needing Attention</span>
+        <span class="coord-kpi-value" id="coord-kpi-attention" style="color:#ef4444;">—</span>
+        <span class="coord-kpi-sub" id="coord-kpi-attention-sub">Pending, unmatched, or insufficient</span>
+      </div>
+    </div>
+
+    <div class="coord-page-grid">
+      <div class="reports-column">
+        <div class="reports-col-header">
+          <div>
+            <div class="reports-col-title">🏥 Facilities</div>
+            <div style="font-size:10px; color:var(--text-brown);">Declared status and approved shelter use</div>
+          </div>
+          <span class="nav-page-badge" id="coord-facility-count" style="position:static;">—</span>
+        </div>
+        <div class="coord-note" style="padding:6px 8px; background:var(--brown-surface); border-radius:5px;">
+          Only facilities marked as operator-approved may be used as emergency shelters. Private or non-approved buildings are not shelters.
+        </div>
+        <div class="audit-filter-row" id="coord-fac-filter-group">
+          <button class="audit-filter-btn active" data-coord-fac-filter="all">All Facilities</button>
+          <button class="audit-filter-btn" data-coord-fac-filter="available">Available</button>
+          <button class="audit-filter-btn" data-coord-fac-filter="unavailable">Unavailable</button>
+          <button class="audit-filter-btn" data-coord-fac-filter="shelters">Approved Shelters</button>
+        </div>
+        <div class="reports-scroll-container" id="coord-facilities-list">
+          <!-- Populated via JS -->
+        </div>
+      </div>
+
+      <div class="reports-column">
+        <div class="reports-col-header">
+          <div>
+            <div class="reports-col-title">📦 Declared Resources</div>
+            <div style="font-size:10px; color:var(--text-brown);">Stock cannot be allocated beyond available quantity</div>
+          </div>
+        </div>
+        <div class="coord-note" id="coord-resource-summary" style="padding:6px 8px; background:var(--brown-surface); border-radius:5px;">
+          Loading declared stock…
+        </div>
+        <div class="reports-scroll-container" id="coord-resources-list">
+          <!-- Populated via JS -->
+        </div>
+      </div>
+
+      <div class="reports-column">
+        <div class="reports-col-header">
+          <div>
+            <div class="reports-col-title">🚚 Requests &amp; Allocation</div>
+            <div style="font-size:10px; color:var(--text-brown);">Match only within compatible declared capacity</div>
+          </div>
+          <button class="btn-action btn-approve" id="coord-auto-match-btn" style="padding:4px 8px; font-size:9px;">
+            ⚡ Auto-Match
+          </button>
+        </div>
+
+        <div class="coord-intake-note">
+          Intake is handled by the Resident SOS channel. This desk matches only compatible declared capacity.
+        </div>
+
+        <div class="audit-filter-row" id="coord-request-filter-group">
+          <button class="audit-filter-btn active" data-coord-req-filter="all">All</button>
+          <button class="audit-filter-btn" data-coord-req-filter="attention">Needs Attention</button>
+          <button class="audit-filter-btn" data-coord-req-filter="pending">Pending</button>
+          <button class="audit-filter-btn" data-coord-req-filter="matched">Matched</button>
+          <button class="audit-filter-btn" data-coord-req-filter="dispatched">Dispatched</button>
+        </div>
+
+        <div class="coord-note" style="display:flex; justify-content:space-between;">
+          <span>Showing</span>
+          <strong id="coord-request-count" style="color:var(--text-brown);">—</strong>
+        </div>
+
+        <div class="reports-scroll-container" id="coord-requests-list">
+          <!-- Populated via JS -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       PAGE 5: COMMUNITY REQUESTS
+       Includes:
+       1. Citizen Emergency SOS Assistance Intake Form
+       2. Live Community Requests Status Board
+       ========================================================= -->
+  <section class="page-view-container" id="page-community">
+    <div class="community-page-grid">
+      
+      <!-- Left: Citizen SOS Intake Form -->
+      <div class="community-form-pane">
+        <div>
+          <div class="op-card-title" style="margin-bottom:4px;">
+            <span>🚨 Citizen Emergency SOS Assistance Intake</span>
+          </div>
+          <p style="font-size:11px; color:var(--text-brown); line-height:1.4;">
+            Direct intake channel for Bandar Elmina residents requiring immediate flood evacuation, emergency food supplies, medical triage, or water rescue assets.
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Full Name / Household Head</label>
+          <input type="text" class="form-input" id="comm-inp-name" placeholder="e.g. Mdm. Halimah &amp; Family (4 pax)" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Contact Phone Number</label>
+          <input type="text" class="form-input" id="comm-inp-phone" placeholder="e.g. +60 12-345 6789" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Residential Address / Sector</label>
+          <input type="text" class="form-input" id="comm-inp-location" placeholder="e.g. No. 15, Jalan Elmina Green 3" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Description of Assistance Needed</label>
+          <input type="text" class="form-input" id="comm-inp-need" placeholder="e.g. Elderly Wheelchair Evacuation &amp; Infant Formula" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Triage Urgency Level</label>
+          <select class="form-select" id="comm-inp-urgency">
+            <option value="critical">🔴 Critical (Life-Threatening / Submerged Ground)</option>
+            <option value="high" selected>🟠 High Priority (Children / Elderly / Medical Support)</option>
+            <option value="medium">🟢 Moderate (Food Rations / Potable Water / Mattresses)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Primary Asset Required</label>
+          <select class="form-select" id="comm-inp-resource">
+            <option value="4x4 Ambulance / Medic">4x4 Ambulance / Medical Team</option>
+            <option value="Fire & Rescue Boat (JBPM)">Fire &amp; Rescue Boat (JBPM)</option>
+            <option value="5-Ton Logistics Truck">5-Ton Logistics Truck (Food Supplies)</option>
+            <option value="25kVA Generator & Gas Supply">Portable 25kVA Power Generator</option>
+          </select>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; margin-top:8px;">
+          <button class="btn-action btn-approve" id="comm-submit-btn" style="padding:10px 18px; font-size:12px;">
+            🚨 Submit Emergency SOS Call
+          </button>
+        </div>
+      </div>
+
+      <!-- Right: Live Community Requests Status Board -->
+      <div class="community-board-pane">
+        <div class="reports-col-header">
+          <div>
+            <div class="reports-col-title">📡 Live Community Incident Status Board</div>
+            <div style="font-size:10px; color:var(--text-brown);">Real-Time Citizen Response Queue &bull; Bandar Elmina Command Desk</div>
+          </div>
+        </div>
+
+        <!-- Filter Pills for Community Board -->
+        <div class="audit-filter-row" id="comm-filter-group">
+          <button class="audit-filter-btn active" data-comm-filter="all">All Community Calls</button>
+          <button class="audit-filter-btn" data-comm-filter="attention">Needs Attention</button>
+          <button class="audit-filter-btn" data-comm-filter="pending">Pending Triage</button>
+          <button class="audit-filter-btn" data-comm-filter="matched">Asset Matched</button>
+          <button class="audit-filter-btn" data-comm-filter="dispatched">Units En Route</button>
+        </div>
+
+        <!-- Stream of Citizen Calls -->
+        <div class="reports-scroll-container" id="community-requests-board">
+          <!-- Populated via JS -->
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Guided demo panel -->
+  <aside class="demo-guide-panel" id="demo-guide-panel" hidden aria-live="polite">
+    <div class="demo-guide-top">
+      <span id="demo-guide-step-label">Step 1 of 6</span>
+      <button type="button" id="demo-guide-close">Close</button>
+    </div>
+    <h3 id="demo-guide-title">Township common operating picture</h3>
+    <p id="demo-guide-body"></p>
+    <div class="demo-guide-actions">
+      <button type="button" id="demo-guide-prev">Back</button>
+      <button type="button" class="demo-guide-next" id="demo-guide-next">Next step</button>
+    </div>
+  </aside>
+
+  <!-- Pilot and commercial brief -->
+  <div class="modal-backdrop" id="pilot-modal" hidden>
+    <div class="modal-card modal-card-wide" role="dialog" aria-modal="true" aria-labelledby="pilot-title">
+      <button class="modal-close" type="button" data-close-modal="pilot-modal" aria-label="Close">Close</button>
+      <div class="modal-kicker">Sime Darby Property - Township of Tomorrow 2026</div>
+      <h2 id="pilot-title">Flood Resilience Operating Layer</h2>
+      <p class="modal-lede">NADITOWN is not another flood dashboard. It is the operating layer that turns township telemetry, field constraints and resident calls into governed, auditable response decisions.</p>
+      <div class="pilot-grid">
+        <div>
+          <h3>People-first outcome</h3>
+          <p>Prioritise residents by urgency, route reachability and verified shelter capacity. Keep a human commander in control of every high-impact action.</p>
+        </div>
+        <div>
+          <h3>90-day pilot</h3>
+          <p>Sector 2 flash-flood scenario in Bandar Elmina: validate SOS intake, route-aware dispatch, closure governance and audit exports with PKOB and township operations.</p>
+        </div>
+        <div>
+          <h3>KPI gates</h3>
+          <p>Median dispatch ETA, % requests matched within declared capacity, commute-time reduction, over-allocation incidents (target zero), audit-chain validity and resident time-to-request.</p>
+        </div>
+        <div>
+          <h3>Integration path</h3>
+          <p>Read-only feeds from CCTV/water sensors, traffic and facility systems; exportable SITREPs and audit packs; no rip-and-replace of existing command tools.</p>
+        </div>
+        <div>
+          <h3>Commercial model</h3>
+          <p>Per-township annual platform fee plus a paid pilot, with optional integration and resilience-reporting packages for developers, asset managers and local authorities.</p>
+        </div>
+        <div>
+          <h3>Why now</h3>
+          <p>Climate-driven flash flooding is becoming a recurring operating cost. A shared response layer protects people, reduces asset downtime and creates defensible ESG evidence.</p>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-action btn-map-view" type="button" data-close-modal="pilot-modal">Back to command</button>
+        <button class="btn-action btn-approve" type="button" id="pilot-open-resident">Open resident SOS</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Generic confirmation modal -->
+  <div class="modal-backdrop" id="confirm-modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+      <div class="modal-kicker" id="confirm-kicker">Commander authorization</div>
+      <h2 id="confirm-title">Authorize action</h2>
+      <p class="modal-lede" id="confirm-message"></p>
+      <div class="modal-actions">
+        <button class="btn-action btn-dismiss" type="button" id="confirm-cancel">Cancel</button>
+        <button class="btn-action btn-approve" type="button" id="confirm-ok">Authorize</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dual-Mode Execution Script: Guarantees 100% functionality whether run from web server or opened directly via file:/// -->
+  <script type="module">
+    // Attempt standard modern ES module load first
+    import { TownshipMap } from './map.js';
+    import { Dashboard } from './dashboard.js';
+    import { store } from './store.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        let mapEngine = null;
+        const mapContainer = document.getElementById('map-viewport');
+        if (mapContainer && typeof window.L !== 'undefined') {
+          mapEngine = new TownshipMap('map-viewport');
+          mapEngine.init();
+        }
+
+        const dashboard = new Dashboard(mapEngine);
+        dashboard.init();
+
+        window.naditown = {
+          map: mapEngine,
+          dashboard: dashboard,
+          store: store
+        };
+        console.log("NADITOWN: Loaded via ES Modules successfully.");
+      } catch (err) {
+        console.warn("ES Module execution warning:", err);
+      }
+    });
+  </script>
+
+  <!-- Fallback Script for file:/// protocol (ensures double-clicking works with ZERO CORS issues) -->
+  <script src="./fallback-data.js"></script>
+  <script src="./coordination-fallback.js"></script>
+  <script>
+    if (!window.naditown) {
+      window.addEventListener('DOMContentLoaded', () => {
+        // Check after short delay if ES module succeeded
+        setTimeout(() => {
+          if (window.naditown && window.naditown.dashboard) return;
+
+          console.log("NADITOWN: Initializing robust standalone fallback runtime for direct file execution...");
+          
+          // Self-contained embedded bundle for immediate execution
+          // 1. DATASETS (in English)
+          const TOWNSHIP_META = {
+            name: "Bandar Elmina (City of Elmina)",
+            developer: "Sime Darby Property",
+            district: "Shah Alam, Selangor, Malaysia",
+            coordinates: [3.1835, 101.5080],
+            zoom: 14
+          };
+
+          const FACILITIES = [
+            { id: "pps-01", name: "Elmina West Community Hall", type: "pps", category: "Evacuation Center (PPS)", coordinates: [3.1855, 101.5042], capacity: 450, currentOccupants: 168, status: "active", amenities: ["Food Rations", "First Aid Clinic", "Power Generator"], contact: "+60 19-321 4589" },
+            { id: "pps-02", name: "SK Subang Bestari (Main Hall)", type: "pps", category: "Evacuation Center (PPS)", coordinates: [3.1780, 101.5280], capacity: 600, currentOccupants: 480, status: "warning", amenities: ["Community Kitchen", "Emergency Maternity Care"], contact: "+60 12-987 6543" },
+            { id: "pps-03", name: "Denai Alam Sports Complex", type: "pps", category: "Evacuation Center (PPS)", coordinates: [3.1620, 101.5150], capacity: 350, currentOccupants: 0, status: "standby", amenities: ["Emergency Helipad Field", "Water Tank"], contact: "+60 13-445 5667" },
+            { id: "med-01", name: "Denai Alam Health Clinic & Triage Base", type: "medical", category: "Healthcare & Triage", coordinates: [3.1660, 101.5185], capacity: 120, currentOccupants: 42, status: "active", amenities: ["4x4 Ambulance Convoy", "Oxygen Cylinders"], contact: "+60 3-7845 1122" },
+            { id: "med-02", name: "Thomson Hospital Subang Medical Base", type: "medical", category: "Referral Medical Center", coordinates: [3.1950, 101.5240], capacity: 80, currentOccupants: 15, status: "active", amenities: ["Mobile ICU", "Emergency Trauma Center"], contact: "+60 3-6140 9999" },
+            { id: "resp-01", name: "Fire & Rescue Station (JBPM) Elmina Post", type: "responder", category: "First Responders", coordinates: [3.1910, 101.5110], capacity: 50, currentOccupants: 38, status: "active", amenities: ["3x Rescue Boats", "2x 5-Ton Trucks"], contact: "+60 3-7846 9994" },
+            { id: "resp-02", name: "Sime Darby Disaster Operation Command (PKOB)", type: "command", category: "Disaster Command", coordinates: [3.1830, 101.5030], capacity: 40, currentOccupants: 22, status: "active", amenities: ["Drone Surveillance Command", "VHF/UHF Radio"], contact: "+60 3-7849 8800" },
+            { id: "log-01", name: "Elmina East Disaster Relief & Logistics Depot", type: "logistics", category: "Logistics Supply Depot", coordinates: [3.1795, 101.5150], capacity: 5000, currentOccupants: 3400, status: "active", amenities: ["Ready-to-Eat Food Packs (MRE)", "Canvas Tents"], contact: "+60 17-665 5443" }
+          ];
+
+          const SENSORS = [
+            { id: "sensor-01", name: "Elmina Retention Pond West Sensor", coordinates: [3.1838, 101.5092], waterLevel: 2.85, dangerLevel: 3.20, status: "warning" },
+            { id: "sensor-02", name: "Sungai Buloh Bridge Sensor (Jalan Elmina 1)", coordinates: [3.1755, 101.5020], waterLevel: 3.42, dangerLevel: 3.10, status: "danger" },
+            { id: "sensor-03", name: "Elmina Rainbow Bridge Sensor", coordinates: [3.1882, 101.5078], waterLevel: 1.95, dangerLevel: 2.80, status: "normal" },
+            { id: "sensor-04", name: "Denai Alam Monsoon Drainage Sensor", coordinates: [3.1645, 101.5125], waterLevel: 2.65, dangerLevel: 2.70, status: "warning" }
+          ];
+
+          const ROAD_SEGMENTS = [
+            { id: "road-01", name: "Persiaran Elmina (West Sector Corridor)", status: "clear", riskLevel: "Low", surfaceWater: "0 cm", passableFor: "All Vehicles", coordinates: [[3.1810, 101.4980], [3.1835, 101.5030], [3.1855, 101.5080]] },
+            { id: "road-02", name: "Sungai Buloh Bridge Crossway (Sector 2 Link)", status: "closed", riskLevel: "Danger", surfaceWater: "65 cm (Rapid Flow)", passableFor: "Closed (Boats Only)", coordinates: [[3.1730, 101.4990], [3.1755, 101.5020], [3.1775, 101.5065]] },
+            { id: "road-03", name: "Denai Alam East Road (SK Subang Link)", status: "hazard", riskLevel: "Moderate", surfaceWater: "20 cm", passableFor: "Trucks & 4x4 Only", coordinates: [[3.1660, 101.5120], [3.1695, 101.5180], [3.1740, 101.5240]] },
+            { id: "road-04", name: "Guthrie Corridor Interchange - Elmina East Bypass", status: "clear", riskLevel: "Low", surfaceWater: "0 cm", passableFor: "All Vehicles (Evacuation Bypass)", coordinates: [[3.1900, 101.5000], [3.1920, 101.5120], [3.1890, 101.5250]] },
+            { id: "road-05", name: "Elmina Central Park Lake Perimeter Ring", status: "hazard", riskLevel: "Moderate", surfaceWater: "25 cm", passableFor: "First Responders Only", coordinates: [[3.1840, 101.5060], [3.1865, 101.5090], [3.1880, 101.5120]] },
+            { id: "road-06", name: "Persiaran Mokhtar Dahari Bypass Corridor", status: "clear", riskLevel: "Low", surfaceWater: "0 cm", passableFor: "All Vehicles", coordinates: [[3.1700, 101.4900], [3.1650, 101.5050], [3.1620, 101.5150]] }
+          ];
+
+          const FLOOD_ZONES = [
+            { id: "zone-red", name: "Sungai Buloh Lowland Flood Basin", severity: "danger", color: "#ef4444", fillColor: "#dc2626", fillOpacity: 0.38, polygon: [[3.1720, 101.4980], [3.1780, 101.5000], [3.1790, 101.5060], [3.1750, 101.5070], [3.1710, 101.5020]] },
+            { id: "zone-orange", name: "Elmina Central Park Lake Overflow Buffer", severity: "warning", color: "#b45309", fillColor: "#d97706", fillOpacity: 0.28, polygon: [[3.1820, 101.5070], [3.1870, 101.5080], [3.1880, 101.5130], [3.1830, 101.5120]] },
+            { id: "zone-yellow", name: "Denai Alam Monsoon Drain Corridor", severity: "advisory", color: "#a16207", fillColor: "#ca8a04", fillOpacity: 0.22, polygon: [[3.1620, 101.5100], [3.1670, 101.5140], [3.1650, 101.5180], [3.1600, 101.5140]] }
+          ];
+
+          const INITIAL_REQUESTS = [
+            { id: "REQ-401", requester: "Mdm. Zaleha & Husband (Seniors)", location: "No. 42, Jalan Elmina Barat 4 (Sector 4)", need: "Wheelchair Evacuation & Asthma Oxygen Support", urgency: "critical", requiredResource: "4x4 Ambulance / Medic", matchedResource: null, status: "pending", timestamp: "10:02:14", eta: "--", coordinates: [3.1812, 101.4995] },
+            { id: "REQ-402", requester: "Block B Residents Committee (15 Families)", location: "Elmina Green 2 Apartments", need: "150 MRE Food Packs & Clean Potable Water", urgency: "high", requiredResource: "5-Ton Logistics Truck", matchedResource: "Elmina East Logistics Depot (Truck L-02)", status: "matched", timestamp: "09:55:30", eta: "18 mins", coordinates: [3.1870, 101.5030] },
+            { id: "REQ-403", requester: "Khairul Family (4 Trapped on Balcony)", location: "Lowland Terrace House (Near Riverbank)", need: "Rapid Water Rescue Boat (0.8m Current)", urgency: "critical", requiredResource: "Fire & Rescue Boat (JBPM)", matchedResource: "Fire Station Elmina (Boat B-01)", status: "dispatched", timestamp: "09:48:12", eta: "6 mins", coordinates: [3.1740, 101.5015] },
+            { id: "REQ-404", requester: "Denai Alam Health Clinic (Triage Center)", location: "Denai Alam Health Clinic", need: "25kVA Backup Power Generator & Medical Oxygen Tank", urgency: "high", requiredResource: "25kVA Generator & Gas Supply", matchedResource: "PKOB Command Center (Mobile Genset #1)", status: "matched", timestamp: "09:40:05", eta: "12 mins", coordinates: [3.1660, 101.5185] },
+            { id: "REQ-405", requester: "Permata Elmina Daycare (8 Children & 2 Teachers)", location: "Jalan Denai Alam Timur 3", need: "High-Clearance Evacuation Truck to SK Subang PPS", urgency: "critical", requiredResource: "4x4 Evacuation Truck", matchedResource: null, status: "pending", timestamp: "10:08:40", eta: "--", coordinates: [3.1685, 101.5155] },
+            { id: "REQ-406", requester: "Elmina West Community Center (PPS-01)", location: "Elmina West Community Hall", need: "60 Foldable Mattresses & Welfare Kits", urgency: "medium", requiredResource: "Shelter Mattresses & Hygiene Kits", matchedResource: "Elmina East Logistics Depot", status: "dispatched", timestamp: "09:35:18", eta: "8 mins", coordinates: [3.1855, 101.5042] }
+          ];
+
+          const INITIAL_DECISIONS = [
+            { id: "REC-101", title: "Relief Convoy Reroute: Sector 2 Bridge Blocked", severity: "critical", category: "Traffic & Routing", description: "Sungai Buloh bridge submerged (+65cm). Divert inbound medical ambulances and relief trucks via Guthrie Corridor Bypass (+1.4 km, +4 mins).", suggestedAction: "Authorize Reroute & Deploy Digital VMS Signboards", status: "pending", actionType: "reroute_guthrie", impact: "+4 mins travel time | Route option remains simulated and must be field-verified" },
+            { id: "REC-102", title: "Shelter Overflow Prevention: SK Subang Bestari", severity: "high", category: "Shelter Operations", description: "SK Subang Bestari PPS is at 80% capacity (480/600 pax). Activate Denai Alam Sports Complex (350 standby beds) as primary intake.", suggestedAction: "Activate Denai Alam Sports Complex as Active PPS", status: "pending", actionType: "activate_pps_denai", impact: "Adds 350 available beds | Prevents shelter overcrowding" },
+            { id: "REC-103", title: "Deploy Additional Water Rescue Boats to Red Zone", severity: "critical", category: "Search & Rescue", description: "Mobilize 2x standby inflatable rescue boats from JBPM Fire Post to Jalan Elmina 1 intersection for priority evacuation.", suggestedAction: "Authorize JBPM Water Rescue Asset Deployment", status: "pending", actionType: "dispatch_boats", impact: "Reduces Search & Rescue response time to < 8 mins" },
+            { id: "REC-104", title: "Activate Elmina Retention Pond Gravity Spillway", severity: "medium", category: "Hydrology Control", description: "Open gravity controlled sluice gate at Retention Pond West to avert uncontrolled road overflow along Persiaran Elmina.", suggestedAction: "Authorize Phased Spillway Water Discharge", status: "approved", actionType: "open_spillway", impact: "Relieves hydraulic head pressure along Persiaran Elmina by 30%" }
+          ];
+
+          const INITIAL_LOGS = [
+            { id: "evt-001", timestamp: "09:15:20", type: "warning", category: "TELEMETRY", message: "Sensor 02 (Sungai Buloh Bridge) breached warning threshold at 3.10m.", author: "IoT Telemetry System", auditHash: "VRF-9821A" },
+            { id: "evt-002", timestamp: "09:22:45", type: "danger", category: "ROAD_BLOCK", message: "Precautionary road closure activated on Sungai Buloh Bridge Crossway.", author: "PKOB Command Desk", auditHash: "VRF-4412B" },
+            { id: "evt-003", timestamp: "09:28:10", type: "info", category: "PPS_UPDATE", message: "Elmina West Community Hall PPS activated. 168 Red Zone residents sheltered.", author: "District Welfare Officer", auditHash: "VRF-7731C" },
+            { id: "evt-004", timestamp: "09:31:00", type: "success", category: "REROUTE", message: "Dijkstra route engine produced a simulated reroute via Guthrie Bypass; field conditions remain unverified.", author: "NADITOWN Routing Engine", auditHash: "VRF-1109D" }
+          ];
+
+          // 2. STATE STORE
+          class StandaloneStore {
+            constructor() {
+              this.state = {
+                emergencyLevel: 'ORANGE',
+                simulation: { rainfall: 68, waterSurge: 0.95, riskMultiplier: 1.4 },
+                facilities: JSON.parse(JSON.stringify(FACILITIES)),
+                sensors: JSON.parse(JSON.stringify(SENSORS)),
+                roads: JSON.parse(JSON.stringify(ROAD_SEGMENTS)),
+                floodZones: JSON.parse(JSON.stringify(FLOOD_ZONES)),
+                resources: {
+                  totalPPSCapacity: 1400,
+                  currentPPSOccupancy: 648,
+                  foodPacks: { stockRemaining: 2350 },
+                  rescueBoats: { standby: 3 },
+                  fourByFourVehicles: { standby: 5 }
+                },
+                requests: JSON.parse(JSON.stringify(INITIAL_REQUESTS)),
+                decisions: JSON.parse(JSON.stringify(INITIAL_DECISIONS)),
+                eventLogs: JSON.parse(JSON.stringify(INITIAL_LOGS)),
+                routing: {
+                  originId: "pps-01",
+                  originName: "Elmina West Community Hall",
+                  originCoords: [3.1855, 101.5042],
+                  destinationId: "pps-02",
+                  destinationName: "SK Subang Bestari (Main Hall)",
+                  destinationCoords: [3.1780, 101.5280],
+                  activePath: [],
+                  pathDistanceKm: 0,
+                  estimatedTimeMin: 0,
+                  recalcTimeMs: 0,
+                  bypassedHazards: 0,
+                  hazardSegmentsUsed: 0,
+                  closedRoadsExcluded: 0,
+                  routeFound: false,
+                  pathStatus: "Calculating simulated route...",
+                  limitations: []
+                },
+                verification: {
+                  routeRecalcTimeMs: 8.4,
+                  totalApprovalsCount: 2,
+                  systemAuditHash: "Offline fallback - no hash"
+                }
+              };
+              this.listeners = {};
+              this.recalculateRoute();
+            }
+
+            subscribe(evt, fn) {
+              if (!this.listeners[evt]) this.listeners[evt] = [];
+              this.listeners[evt].push(fn);
+            }
+
+            emit(evt, payload) {
+              if (this.listeners[evt]) this.listeners[evt].forEach(fn => fn(payload));
+            }
+
+            addLog(category, message, author = "System") {
+              const now = new Date();
+              const timeStr = now.toTimeString().split(' ')[0];
+              const entry = { id: `evt-${Date.now()}`, timestamp: timeStr, category, message, author, auditHash: 'Offline fallback - no hash' };
+              this.state.eventLogs.unshift(entry);
+              this.state.verification.systemAuditHash = 'Offline fallback - no hash';
+              this.emit('log_added', entry);
+            }
+
+            setRoadStatus(roadId, newStatus) {
+              const r = this.state.roads.find(x => x.id === roadId);
+              if (r) {
+                r.status = newStatus;
+                r.riskLevel = newStatus === 'closed' ? 'Danger' : (newStatus === 'hazard' ? 'Moderate' : 'Low');
+                r.surfaceWater = newStatus === 'closed' ? '65 cm' : (newStatus === 'hazard' ? '20 cm' : '0 cm');
+                r.passableFor = newStatus === 'closed' ? 'Closed' : (newStatus === 'hazard' ? '4x4 Only' : 'All Vehicles');
+                this.addLog('ROAD_BLOCK', `Road ${r.name} status updated to ${newStatus.toUpperCase()}`, 'Operator');
+                this.recalculateRoute();
+                this.emit('roads_updated', this.state.roads);
+              }
+            }
+
+            recalculateRoute() {
+              const routing = this.state.routing;
+              const origin = this.state.facilities.find(f => f.id === routing.originId) || this.state.facilities[0];
+              const destination = this.state.facilities.find(f => f.id === routing.destinationId)
+                || this.state.facilities.find(f => f.id !== origin.id)
+                || this.state.facilities[0];
+
+              routing.originId = origin.id;
+              routing.destinationId = destination.id;
+              routing.originName = origin.name;
+              routing.destinationName = destination.name;
+              routing.originCoords = origin.coordinates;
+              routing.destinationCoords = destination.coordinates;
+
+              if (window.NADITOWN_ROUTING && typeof window.NADITOWN_ROUTING.findRoute === 'function') {
+                const result = window.NADITOWN_ROUTING.findRoute(origin, destination, this.state.roads);
+                Object.assign(routing, result);
+                this.emit('route_recalculated', routing);
+
+                const geometryRequestId = (this._routeGeometryRequestId || 0) + 1;
+                this._routeGeometryRequestId = geometryRequestId;
+                if (typeof window.NADITOWN_ROUTING.fetchRoadFollowingRoute === 'function') {
+                  window.NADITOWN_ROUTING.fetchRoadFollowingRoute(result, this.state.roads).then(enriched => {
+                    if (geometryRequestId !== this._routeGeometryRequestId) return;
+                    Object.assign(routing, enriched);
+                    this.emit('route_recalculated', routing);
+                  }).catch(() => {});
+                }
+                return;
+              }
+
+              routing.routeFound = false;
+              routing.activePath = [];
+              routing.pathStatus = 'Route engine not available in this runtime.';
+              this.emit('route_recalculated', routing);
+            }
+
+            setRouteEndpoints(originId, destinationId) {
+              const origin = this.state.facilities.find(f => f.id === originId);
+              const destination = this.state.facilities.find(f => f.id === destinationId);
+              if (!origin || !destination) return null;
+              this.state.routing.originId = origin.id;
+              this.state.routing.destinationId = destination.id;
+              this.recalculateRoute();
+              this.addLog('REROUTE', `Simulated route recalculated: ${origin.name} to ${destination.name}`, 'NADITOWN Route Engine');
+              return this.state.routing;
+            }
+
+            approveDecision(id) {
+              const dec = this.state.decisions.find(d => d.id === id);
+              if (dec) {
+                dec.status = 'approved';
+                this.state.verification.totalApprovalsCount++;
+                this.addLog('APPROVAL', `Authorized action for ${dec.id}: ${dec.title}`, 'PKOB Commander');
+                if (dec.actionType === 'activate_pps_denai') {
+                  const pps = this.state.facilities.find(f => f.id === 'pps-03');
+                  if (pps) pps.status = 'active';
+                  this.emit('facility_updated', pps);
+                }
+                this.emit('decision_updated', dec);
+              }
+            }
+
+            dismissDecision(id) {
+              const dec = this.state.decisions.find(d => d.id === id);
+              if (dec) {
+                dec.status = 'dismissed';
+                this.addLog('APPROVAL', `Dismissed recommendation ${dec.id}`, 'PKOB Commander');
+                this.emit('decision_updated', dec);
+              }
+            }
+
+            matchRequest(id) {
+              const req = this.state.requests.find(r => r.id === id);
+              if (req) {
+                req.status = 'matched';
+                req.matchedResource = req.requiredResource.includes('Ambulance') ? "4x4 Emergency Ambulance Alpha" : "NADMA Relief Convoy";
+                req.eta = "14 mins";
+                this.addLog('DISPATCH', `Asset matched for request ${req.id} (${req.requester})`, 'Operations Desk');
+                this.emit('request_updated', req);
+              }
+            }
+
+            dispatchRequest(id) {
+              const req = this.state.requests.find(r => r.id === id);
+              if (req) {
+                req.status = 'dispatched';
+                req.eta = "En Route (8 mins)";
+                this.addLog('DISPATCH', `Resource dispatched to ${req.location} for ${req.id}`, 'Logistics Base');
+                this.emit('request_updated', req);
+              }
+            }
+
+            autoMatchAllRequests() {
+              const pend = this.state.requests.filter(r => r.status === 'pending');
+              pend.forEach(r => this.matchRequest(r.id));
+              return pend.length;
+            }
+
+            addCitizenRequest(reqData) {
+              const newId = `REQ-${this.state.requests.length + 401}`;
+              const now = new Date();
+              const req = {
+                id: newId,
+                status: 'pending',
+                timestamp: now.toTimeString().split(' ')[0],
+                eta: '--',
+                matchedResource: null,
+                ...reqData
+              };
+              this.state.requests.unshift(req);
+              this.addLog('CITIZEN_SOS', `New Emergency SOS call registered: ${newId} (${req.requester})`, 'Community Desk');
+              this.emit('request_added', req);
+              return req;
+            }
+
+            setSimulationValue(k, v) {
+              this.state.simulation[k] = parseFloat(v);
+              if (k === 'rainfall' || k === 'waterSurge') {
+                const rain = this.state.simulation.rainfall;
+                const surge = this.state.simulation.waterSurge;
+                if (rain > 100 || surge > 1.5) this.state.emergencyLevel = 'RED';
+                else if (rain > 50 || surge > 0.7) this.state.emergencyLevel = 'ORANGE';
+                else this.state.emergencyLevel = 'GREEN';
+              }
+              this.emit('simulation_updated', this.state.simulation);
+            }
+
+            applyScenarioPreset(preset) {
+              if (preset === 'normal') {
+                this.state.simulation = { rainfall: 15, waterSurge: 0.15, riskMultiplier: 1.0 };
+                this.state.emergencyLevel = 'GREEN';
+                this.state.roads.forEach(r => r.status = 'clear');
+              } else if (preset === 'sector2_flood') {
+                this.state.simulation = { rainfall: 68, waterSurge: 0.95, riskMultiplier: 1.4 };
+                this.state.emergencyLevel = 'ORANGE';
+                this.setRoadStatus('road-02', 'closed');
+                this.setRoadStatus('road-03', 'hazard');
+              } else if (preset === 'monsoon_deluge') {
+                this.state.simulation = { rainfall: 125, waterSurge: 1.85, riskMultiplier: 2.1 };
+                this.state.emergencyLevel = 'RED';
+                this.setRoadStatus('road-02', 'closed');
+                this.setRoadStatus('road-03', 'closed');
+                this.setRoadStatus('road-05', 'closed');
+              } else if (preset === 'max_evacuation') {
+                this.state.simulation = { rainfall: 140, waterSurge: 2.20, riskMultiplier: 2.4 };
+                this.state.emergencyLevel = 'RED';
+                this.state.facilities.forEach(f => {
+                  if (f.type === 'pps') f.status = 'active';
+                });
+              }
+              this.addLog('SIMULATION', `Scenario Preset applied: ${preset.toUpperCase()}`, 'Operator');
+              this.emit('simulation_updated', this.state.simulation);
+            }
+
+            exportAuditLogJSON() {
+              return JSON.stringify({
+                system: "NADITOWN Adaptive Township Emergency Operating System",
+                exportedAt: new Date().toISOString(),
+                verification: this.state.verification,
+                logs: this.state.eventLogs
+              }, null, 2);
+            }
+          }
+
+          // 3. MAP ENGINE
+          class StandaloneMap {
+            constructor(containerId, storeEngine) {
+              this.containerId = containerId;
+              this.store = storeEngine;
+              this.map = null;
+              this.layerGroups = {};
+            }
+
+            init() {
+              if (typeof window.L === 'undefined') return;
+              this.map = L.map(this.containerId, { zoomControl: true, maxZoom: 19 }).setView(TOWNSHIP_META.coordinates, TOWNSHIP_META.zoom);
+              
+              this.baseTiles = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
+                maxZoom: 19
+              }).addTo(this.map);
+
+              this.layerGroups.floodZones = L.layerGroup().addTo(this.map);
+              this.layerGroups.roads = L.layerGroup().addTo(this.map);
+              this.layerGroups.pps = L.layerGroup().addTo(this.map);
+              this.layerGroups.sensors = L.layerGroup().addTo(this.map);
+              this.layerGroups.route = L.layerGroup().addTo(this.map);
+
+              this.renderFloodZones();
+              this.renderRoads();
+              this.renderFacilities();
+              this.renderSensors();
+              this.renderDijkstraRoute();
+            }
+
+            renderFloodZones() {
+              this.layerGroups.floodZones.clearLayers();
+              FLOOD_ZONES.forEach(z => {
+                L.polygon(z.polygon, {
+                  color: z.color,
+                  fillColor: z.fillColor,
+                  fillOpacity: z.fillOpacity,
+                  weight: 2
+                }).bindPopup(`<strong>${z.name}</strong><br>Severity: ${z.severity.toUpperCase()}`).addTo(this.layerGroups.floodZones);
+              });
+            }
+
+            renderRoads() {
+              this.layerGroups.roads.clearLayers();
+              this.store.state.roads.forEach(r => {
+                const color = r.status === 'closed' ? '#ef4444' : (r.status === 'hazard' ? '#b45309' : '#33bfd6');
+                L.polyline(r.coordinates, {
+                  color: color,
+                  weight: r.status === 'closed' ? 5 : 4,
+                  dashArray: r.status === 'closed' ? '8, 6' : null
+                }).bindPopup(`<strong>${r.name}</strong><br>Status: ${r.status.toUpperCase()}<br>Water: ${r.surfaceWater}`).addTo(this.layerGroups.roads);
+              });
+              if (window.NADITOWN_ROUTING) {
+                window.NADITOWN_ROUTING.CONNECTORS.forEach(connector => {
+                  L.polyline(connector.geometry, {
+                    color: '#6b8a93',
+                    weight: 2,
+                    opacity: 0.55,
+                    dashArray: '4, 7'
+                  }).bindTooltip(`Simulated local connector: ${connector.name}`, { sticky: true }).addTo(this.layerGroups.roads);
+                });
+              }
+            }
+
+            renderFacilities() {
+              this.layerGroups.pps.clearLayers();
+              FACILITIES.forEach(f => {
+                const isPPS = f.type === 'pps';
+                const markerColor = isPPS ? '#33bfd6' : (f.type === 'medical' ? '#ef4444' : '#4f8b9b');
+                const m = L.circleMarker(f.coordinates, {
+                  radius: 7,
+                  color: '#ffffff',
+                  fillColor: markerColor,
+                  fillOpacity: 0.9,
+                  weight: 2
+                }).bindPopup(`<strong>${f.name}</strong><br>${f.category}<br>Occupancy: ${f.currentOccupants} / ${f.capacity}`).addTo(this.layerGroups.pps);
+              });
+            }
+
+            renderSensors() {
+              this.layerGroups.sensors.clearLayers();
+              SENSORS.forEach(s => {
+                L.circleMarker(s.coordinates, {
+                  radius: 5,
+                  color: '#ffffff',
+                  fillColor: '#b45309',
+                  fillOpacity: 1,
+                  weight: 1.5
+                }).bindPopup(`<strong>${s.name}</strong><br>Water Level: ${s.waterLevel}m (Danger: ${s.dangerLevel}m)`).addTo(this.layerGroups.sensors);
+              });
+            }
+
+            renderDijkstraRoute() {
+              this.layerGroups.route.clearLayers();
+              const data = this.store.state.routing;
+              const points = data.activePath || [];
+              const routeFound = !!data.routeFound && points.length > 1;
+
+              if (routeFound) {
+                L.polyline(points, {
+                  color: '#06252c',
+                  weight: 10,
+                  opacity: 0.85,
+                  lineCap: 'round',
+                  lineJoin: 'round'
+                }).addTo(this.layerGroups.route);
+                L.polyline(points, {
+                  color: '#1fa9b8',
+                  weight: 6,
+                  opacity: 0.98,
+                  lineCap: 'round',
+                  lineJoin: 'round'
+                }).bindPopup(`<strong style="color:#33bfd6;">Road-Following Simulated Route</strong><br>${data.originName} &rarr; ${data.destinationName}<br>Distance: ${data.pathDistanceKm} km | ETA: ~${data.estimatedTimeMin} min<br><span style="color:${data.roadGeometryStatus === 'aligned' ? '#33bfd6' : '#f59e0b'};font-size:10px;">${data.roadGeometryStatus === 'aligned' ? 'Road geometry: OpenStreetMap' : 'Schematic graph alignment'}</span><br><span style="color:#93aab2;font-size:10px;">Simulation only - not a real-world safety assessment.</span>`).addTo(this.layerGroups.route);
+              }
+
+              if (data.originCoords) {
+                L.circleMarker(data.originCoords, {
+                  radius: 8,
+                  fillColor: '#b45309',
+                  fillOpacity: 1,
+                  color: '#ffffff',
+                  weight: 2
+                }).bindTooltip(`Origin: ${data.originName}`, { direction: 'top' }).addTo(this.layerGroups.route);
+              }
+              if (data.destinationCoords) {
+                L.circleMarker(data.destinationCoords, {
+                  radius: 9,
+                  fillColor: routeFound ? '#117c96' : '#ef4444',
+                  fillOpacity: 1,
+                  color: '#ffffff',
+                  weight: 2
+                }).bindTooltip(routeFound ? `Destination: ${data.destinationName}` : `No simulated route reached ${data.destinationName}`, { direction: 'top' }).addTo(this.layerGroups.route);
+              }
+            }
+
+            focusLocation(lat, lng, zoom = 16) {
+              if (this.map) this.map.setView([lat, lng], zoom);
+            }
+
+            resetView() {
+              if (this.map) this.map.setView(TOWNSHIP_META.coordinates, TOWNSHIP_META.zoom);
+            }
+
+            switchBaseLayer(theme) {
+              if (this.baseTiles) this.map.removeLayer(this.baseTiles);
+              let url = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+              let attribution = 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community';
+              let maxZoom = 19;
+              if (theme === 'street') {
+                url = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+                attribution = '&copy; OpenStreetMap contributors';
+              } else if (theme === 'dark') {
+                url = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}';
+                attribution = '&copy; Esri, DeLorme, NAVTEQ';
+                maxZoom = 16;
+              }
+              this.baseTiles = L.tileLayer(url, { attribution: attribution, maxZoom: maxZoom }).addTo(this.map);
+            }
+          }
+
+          // 4. INSTANTIATE & BIND UI
+          const localStore = new StandaloneStore();
+          let localMap = null;
+          if (document.getElementById('map-viewport') && typeof window.L !== 'undefined') {
+            localMap = new StandaloneMap('map-viewport', localStore);
+            localMap.init();
+          }
+
+          // Setup Dashboard Operations
+          class StandaloneDashboard {
+            constructor(mapEngine, storeEngine) {
+              this.map = mapEngine;
+              this.store = storeEngine;
+              this.currentReqFilter = 'all';
+              this.currentLogFilter = 'ALL';
+              this.currentFacFilter = 'all';
+              this.currentCommFilter = 'all';
+            }
+
+            init() {
+              this.initClock();
+              this.initNavigation();
+              this.initDashboardPage();
+              this.initMapPage();
+              this.initReportsPage();
+              this.initCommunityPage();
+              this.setupSubscriptions();
+              
+              const h = window.location.hash.replace('#', '');
+              if (['dashboard', 'map', 'reports', 'coordination', 'community'].includes(h)) {
+                this.switchPage(`page-${h}`);
+              } else {
+                this.switchPage('page-dashboard');
+              }
+            }
+
+            initClock() {
+              const el = document.getElementById('live-clock');
+              const tick = () => {
+                const now = new Date();
+                if (el) el.textContent = now.toLocaleTimeString('en-GB') + ' UTC+8';
+              };
+              tick();
+              setInterval(tick, 1000);
+            }
+
+            initNavigation() {
+              document.querySelectorAll('.nav-page-btn').forEach(btn => {
+                btn.onclick = () => this.switchPage(btn.dataset.page);
+              });
+              window.onhashchange = () => {
+                const h = window.location.hash.replace('#', '');
+                if (['dashboard', 'map', 'reports', 'coordination', 'community'].includes(h)) {
+                  this.switchPage(`page-${h}`, false);
+                }
+              };
+            }
+
+            switchPage(pageId, updateHash = true) {
+              document.querySelectorAll('.page-view-container').forEach(p => p.classList.remove('active'));
+              document.querySelectorAll('.nav-page-btn').forEach(b => b.classList.remove('active'));
+
+              const target = document.getElementById(pageId);
+              if (target) target.classList.add('active');
+
+              const btn = document.querySelector(`.nav-page-btn[data-page="${pageId}"]`);
+              if (btn) btn.classList.add('active');
+
+              if (updateHash) window.location.hash = pageId.replace('page-', '');
+
+              if (pageId === 'page-map' && this.map && this.map.map) {
+                setTimeout(() => this.map.map.invalidateSize(), 150);
+              }
+            }
+
+            initDashboardPage() {
+              this.updateKPIs();
+              this.renderRoadsDetailTable();
+              this.renderShelterDetailCards();
+              this.renderRequestsSummaryCard();
+              this.renderRouteBenchmarkCard();
+            }
+
+            updateKPIs() {
+              // Roads
+              const roads = this.store.state.roads;
+              const open = roads.filter(r => r.status === 'clear').length;
+              const haz = roads.filter(r => r.status === 'hazard').length;
+              const closed = roads.filter(r => r.status === 'closed').length;
+              const pct = Math.round(((open + haz * 0.5) / roads.length) * 100);
+              const openEl = document.getElementById('kpi-open-roads');
+              if (openEl) openEl.textContent = open;
+              const badgeEl = document.getElementById('kpi-road-badge');
+              if (badgeEl) {
+                badgeEl.textContent = closed > 0 ? `${closed} Closed` : (haz > 0 ? `${haz} Hazard` : 'All Clear');
+                badgeEl.style.color = closed > 0 ? '#ef4444' : (haz > 0 ? '#f59e0b' : '#33bfd6');
+              }
+              const subEl = document.getElementById('kpi-road-subtext');
+              if (subEl) subEl.textContent = `${open} Clear • ${haz} Hazard • ${closed} Closed`;
+              const pctEl = document.getElementById('kpi-road-pct');
+              if (pctEl) pctEl.textContent = `${pct}% Passable`;
+              const barEl = document.getElementById('kpi-road-bar');
+              if (barEl) barEl.style.width = `${pct}%`;
+
+              // Shelters
+              const facs = this.store.state.facilities.filter(f => f.type === 'pps');
+              const occ = facs.reduce((s, f) => s + f.currentOccupants, 0);
+              const cap = facs.reduce((s, f) => s + f.capacity, 0);
+              const spct = cap > 0 ? ((occ / cap) * 100).toFixed(1) : 0;
+              const shPctEl = document.getElementById('kpi-shelter-pct');
+              if (shPctEl) shPctEl.textContent = `${spct}%`;
+              const shCntEl = document.getElementById('kpi-shelter-counts');
+              if (shCntEl) shCntEl.textContent = `(${occ.toLocaleString()} / ${cap.toLocaleString()} Evacuees)`;
+              const shBarEl = document.getElementById('kpi-shelter-bar');
+              if (shBarEl) shBarEl.style.width = `${Math.min(spct, 100)}%`;
+
+              // Requests
+              const reqs = this.store.state.requests;
+              const pend = reqs.filter(r => r.status === 'pending').length;
+              const mat = reqs.filter(r => r.status === 'matched').length;
+              const disp = reqs.filter(r => r.status === 'dispatched').length;
+              const rRate = reqs.length > 0 ? (((mat + disp) / reqs.length) * 100).toFixed(1) : 0;
+              const totEl = document.getElementById('kpi-total-requests');
+              if (totEl) totEl.textContent = reqs.length;
+              const rBadge = document.getElementById('kpi-req-badge');
+              if (rBadge) rBadge.textContent = `${pend} Pending`;
+              const rBrk = document.getElementById('kpi-requests-breakdown');
+              if (rBrk) rBrk.textContent = `${pend} Pending • ${mat} Matched • ${disp} Dispatched`;
+              const rRateEl = document.getElementById('kpi-match-rate');
+              if (rRateEl) rRateEl.textContent = `${rRate}% Matched`;
+              const rBar = document.getElementById('kpi-requests-bar');
+              if (rBar) rBar.style.width = `${rRate}%`;
+
+              // Badges in Nav
+              const nRep = document.getElementById('nav-reports-badge');
+              if (nRep) nRep.textContent = this.store.state.decisions.filter(d => d.status === 'pending').length;
+              const nCom = document.getElementById('nav-community-badge');
+              if (nCom) nCom.textContent = pend;
+
+              // Routing
+              const rout = this.store.state.routing;
+              const timeEl = document.getElementById('kpi-recalc-time');
+              if (timeEl) timeEl.textContent = rout.recalcTimeMs;
+              const hazEl = document.getElementById('kpi-route-hazard-count');
+              if (hazEl) {
+                hazEl.textContent = rout.routeFound
+                  ? `${rout.hazardSegmentsUsed} Hazard Segment${rout.hazardSegmentsUsed === 1 ? '' : 's'} on Route`
+                  : 'No Route Found';
+              }
+              const vrfEl = document.getElementById('kpi-verified-count');
+              if (vrfEl) vrfEl.textContent = `${this.store.state.eventLogs.length} Triggers Verified`;
+
+              const bannerTag = document.getElementById('banner-route-tag');
+              const bannerText = document.getElementById('banner-route-text');
+              const bannerStat = document.getElementById('banner-recalc-stat');
+              if (bannerTag) {
+                if (!rout.routeFound) {
+                  bannerTag.textContent = 'NO ROUTE FOUND';
+                  bannerTag.style.background = 'rgba(239, 68, 68, 0.2)';
+                  bannerTag.style.color = '#ef4444';
+                  bannerTag.style.borderColor = '#ef4444';
+                } else if (rout.hazardSegmentsUsed > 0) {
+                  bannerTag.textContent = 'SIMULATED ROUTE - HAZARD';
+                  bannerTag.style.background = 'rgba(180, 83, 9, 0.2)';
+                  bannerTag.style.color = '#f59e0b';
+                  bannerTag.style.borderColor = '#b45309';
+                } else {
+                  bannerTag.textContent = 'SIMULATED ROUTE FOUND';
+                  bannerTag.style.background = 'rgba(51, 191, 214, 0.2)';
+                  bannerTag.style.color = '#33bfd6';
+                  bannerTag.style.borderColor = '#117c96';
+                }
+              }
+              if (bannerText) {
+                bannerText.textContent = rout.routeFound
+                  ? `${rout.originName} ➔ ${rout.destinationName}`
+                  : `No simulated route from ${rout.originName} to ${rout.destinationName}`;
+              }
+              if (bannerStat) {
+                bannerStat.textContent = rout.routeFound
+                  ? `Dijkstra: ${rout.recalcTimeMs} ms | ${rout.pathDistanceKm} km | ETA ~${rout.estimatedTimeMin} min | ${rout.closedRoadsExcluded} closed excluded`
+                  : `Dijkstra: ${rout.recalcTimeMs} ms | ${rout.closedRoadsExcluded} closed segment(s) excluded`;
+              }
+              const vrfCalcTime = document.getElementById('vrf-calc-time');
+              if (vrfCalcTime) vrfCalcTime.textContent = `${rout.recalcTimeMs} ms (Dijkstra)`;
+            }
+
+            renderRoadsDetailTable() {
+              const tbody = document.getElementById('dash-roads-table-body');
+              if (!tbody) return;
+              tbody.innerHTML = '';
+              this.store.state.roads.forEach(r => {
+                const tr = document.createElement('tr');
+                const isClosed = r.status === 'closed';
+                const isHazard = r.status === 'hazard';
+                const badge = isClosed ? `<span class="badge-status-closed">🔴 Closed</span>` : (isHazard ? `<span class="badge-status-hazard">⚠️ Hazard</span>` : `<span class="badge-status-clear">🟢 Clear</span>`);
+                tr.innerHTML = `
+                  <td><strong style="color:var(--text-white);">${r.name}</strong></td>
+                  <td>${badge}</td>
+                  <td><span style="font-family:monospace; color:var(--text-white); font-weight:700;">${r.surfaceWater}</span></td>
+                  <td style="color:var(--text-brown);">${r.passableFor}</td>
+                  <td><span class="risk-tag risk-${r.riskLevel.toLowerCase()}">${r.riskLevel}</span></td>
+                  <td>
+                    <button class="btn-action ${isClosed ? 'btn-approve' : 'btn-dismiss'}" data-toggle-road="${r.id}" style="padding:4px 8px; font-size:10px;">
+                      ${isClosed ? 'Reopen' : 'Close Road'}
+                    </button>
+                  </td>
+                `;
+                tr.querySelector(`[data-toggle-road="${r.id}"]`).onclick = () => {
+                  this.store.setRoadStatus(r.id, isClosed ? 'clear' : 'closed');
+                  this.showToast(`Updated ${r.name} to ${isClosed ? 'CLEAR' : 'CLOSED'}`, 'info');
+                };
+                tbody.appendChild(tr);
+              });
+            }
+
+            renderShelterDetailCards() {
+              const c = document.getElementById('dash-shelter-cards');
+              if (!c) return;
+              c.innerHTML = '';
+              this.store.state.facilities.filter(f => f.type === 'pps').forEach(fac => {
+                const card = document.createElement('div');
+                card.className = 'detail-stat-card';
+                const pct = fac.capacity > 0 ? Math.round((fac.currentOccupants / fac.capacity) * 100) : 0;
+                const barColor = pct >= 90 ? '#ef4444' : (pct >= 70 ? '#b45309' : '#33bfd6');
+                card.innerHTML = `
+                  <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px;">
+                    <h4 style="font-size:13px; font-weight:700; color:var(--text-white);">${fac.name}</h4>
+                    <span style="font-size:10px; font-weight:700; color:${fac.status === 'active' ? '#33bfd6' : (fac.status === 'warning' ? '#f59e0b' : '#93aab2')};">
+                      ● ${fac.status.toUpperCase()}
+                    </span>
+                  </div>
+                  <div style="font-size:11px; color:var(--text-brown); margin-bottom:6px;">
+                    Occupancy: <strong>${fac.currentOccupants} / ${fac.capacity} (${pct}%)</strong>
+                  </div>
+                  <div class="mini-progress-track" style="margin-bottom:8px;">
+                    <div class="mini-progress-fill" style="width:${Math.min(pct, 100)}%; background:${barColor};"></div>
+                  </div>
+                  <div style="font-size:10px; color:var(--text-muted); line-height:1.4;">
+                    <strong>Amenities:</strong> ${fac.amenities.slice(0, 3).join(', ')}<br>
+                    <strong>Contact:</strong> ${fac.contact}
+                  </div>
+                `;
+                c.appendChild(card);
+              });
+            }
+
+            renderRequestsSummaryCard() {
+              const c = document.getElementById('dash-requests-summary');
+              if (!c) return;
+              const reqs = this.store.state.requests;
+              const crit = reqs.filter(r => r.urgency === 'critical').length;
+              const high = reqs.filter(r => r.urgency === 'high').length;
+              const med = reqs.filter(r => r.urgency === 'medium').length;
+              c.innerHTML = `
+                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-bottom:10px;">
+                  <div class="summary-metric-tile">
+                    <span class="tile-label">Critical SOS</span>
+                    <span class="tile-val" style="color:#ef4444;">${crit}</span>
+                  </div>
+                  <div class="summary-metric-tile">
+                    <span class="tile-label">High Priority</span>
+                    <span class="tile-val" style="color:#f59e0b;">${high}</span>
+                  </div>
+                  <div class="summary-metric-tile">
+                    <span class="tile-label">Moderate</span>
+                    <span class="tile-val" style="color:#33bfd6;">${med}</span>
+                  </div>
+                </div>
+                <div style="font-size:11px; color:var(--text-brown);">
+                  Latest Incident: <strong style="color:var(--text-white);">${reqs[0]?.requester || 'None'}</strong> (${reqs[0]?.need || '--'})
+                </div>
+              `;
+            }
+
+            renderRouteBenchmarkCard() {
+              const c = document.getElementById('dash-route-benchmark');
+              if (!c) return;
+              const r = this.store.state.routing;
+              const found = r.routeFound;
+              const color = found ? (r.hazardSegmentsUsed > 0 ? '#f59e0b' : '#33bfd6') : '#ef4444';
+              const label = found ? (r.hazardSegmentsUsed > 0 ? 'ROUTE FOUND - HAZARD' : 'ROUTE FOUND') : 'NO ROUTE FOUND';
+              c.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                  <div>
+                    <div style="font-size:10px; color:var(--text-brown); text-transform:uppercase; font-weight:700;">Dijkstra Route Calculation Latency</div>
+                    <div style="font-size:24px; font-weight:800; color:#33bfd6;">${r.recalcTimeMs} ms</div>
+                  </div>
+                  <span class="route-status-tag" style="padding:4px 8px; font-size:11px; color:${color}; border-color:${color}; background:${color}22;">${label}</span>
+                </div>
+                <div style="font-size:11px; color:var(--text-muted); background:var(--card-inner); padding:8px; border-radius:6px; border:1px solid var(--border);">
+                  <div><strong>Origin:</strong> ${r.originName}</div>
+                  <div><strong>Destination:</strong> ${r.destinationName}</div>
+                  <div><strong>Path Status:</strong> ${r.pathStatus}</div>
+                  ${found ? `<div><strong>Distance:</strong> ${r.pathDistanceKm} km | <strong>ETA:</strong> ~${r.estimatedTimeMin} mins</div>
+                  <div><strong>Hazard segments on route:</strong> ${r.hazardSegmentsUsed} | <strong>Closed excluded:</strong> ${r.closedRoadsExcluded}</div>` : ''}
+                  <div style="margin-top:6px; color:#93aab2;">Simulation only - not a real-world safety assessment.</div>
+                </div>
+              `;
+            }
+
+            initMapPage() {
+              // Toggles
+              ['floodZones', 'roads', 'pps', 'sensors', 'route'].forEach(k => {
+                const btn = document.getElementById(`layer-btn-${k}`);
+                if (btn) {
+                  btn.onclick = () => {
+                    const active = btn.classList.toggle('active');
+                    if (this.map && this.map.layerGroups[k]) {
+                      if (active) this.map.map.addLayer(this.map.layerGroups[k]);
+                      else this.map.map.removeLayer(this.map.layerGroups[k]);
+                    }
+                  };
+                }
+              });
+
+              // Style switch
+              const sBtn = document.getElementById('map-style-toggle');
+              const styles = ['satellite', 'street', 'dark'];
+              let sIdx = 0;
+              if (sBtn) {
+                sBtn.onclick = () => {
+                  sIdx = (sIdx + 1) % styles.length;
+                  const next = styles[sIdx];
+                  if (this.map) this.map.switchBaseLayer(next);
+                  sBtn.textContent = next === 'satellite' ? '🛰️ Satellite' : (next === 'street' ? '🗺️ Street' : '🌙 Dark');
+                };
+              }
+
+              // Reset
+              const rBtn = document.getElementById('map-reset-btn');
+              if (rBtn) rBtn.onclick = () => this.map && this.map.resetView();
+
+              // Sliders
+              const sRain = document.getElementById('slider-rainfall');
+              const sSurge = document.getElementById('slider-surge');
+              const sRisk = document.getElementById('slider-risk');
+              if (sRain) {
+                sRain.oninput = (e) => {
+                  const val = e.target.value;
+                  document.getElementById('val-rainfall').textContent = `${val} mm/h`;
+                  this.store.setSimulationValue('rainfall', val);
+                  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+                };
+              }
+              if (sSurge) {
+                sSurge.oninput = (e) => {
+                  const val = parseFloat(e.target.value).toFixed(2);
+                  document.getElementById('val-surge').textContent = `+${val} m`;
+                  this.store.setSimulationValue('waterSurge', val);
+                  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+                };
+              }
+              if (sRisk) {
+                sRisk.oninput = (e) => {
+                  const val = parseFloat(e.target.value).toFixed(1);
+                  document.getElementById('val-risk').textContent = `${val}x`;
+                  this.store.setSimulationValue('riskMultiplier', val);
+                  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+                };
+              }
+
+              // Presets
+              document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.onclick = () => {
+                  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+                  btn.classList.add('active');
+                  this.store.applyScenarioPreset(btn.dataset.preset);
+                  const sim = this.store.state.simulation;
+                  if (sRain) sRain.value = sim.rainfall;
+                  if (sSurge) sSurge.value = sim.waterSurge;
+                  if (sRisk) sRisk.value = sim.riskMultiplier;
+                  document.getElementById('val-rainfall').textContent = `${sim.rainfall} mm/h`;
+                  document.getElementById('val-surge').textContent = `+${sim.waterSurge.toFixed(2)} m`;
+                  document.getElementById('val-risk').textContent = `${sim.riskMultiplier.toFixed(1)}x`;
+                  
+                  const emPill = document.getElementById('emergency-pill');
+                  const emText = document.getElementById('emergency-level-text');
+                  if (emText && emPill) {
+                    const lvl = this.store.state.emergencyLevel;
+                    emText.textContent = lvl === 'RED' ? "LEVEL 4: RED DELUGE ALERT" : (lvl === 'ORANGE' ? "LEVEL 3: ORANGE ALERT" : "LEVEL 1: GREEN NORMAL");
+                    emPill.style.color = lvl === 'RED' ? "#ef4444" : (lvl === 'ORANGE' ? "#f59e0b" : "#33bfd6");
+                  }
+                  this.showToast(`Scenario Applied: ${btn.textContent}`, 'warning');
+                };
+              });
+
+              this.initRoutePlanner();
+              this.renderFacilitiesList();
+            }
+
+            initRoutePlanner() {
+              const originSelect = document.getElementById('route-origin-select');
+              const destinationSelect = document.getElementById('route-destination-select');
+              const calculateBtn = document.getElementById('route-calculate-btn');
+              if (!originSelect || !destinationSelect) return;
+
+              const options = this.store.state.facilities.map(facility =>
+                `<option value="${facility.id}">${facility.name}</option>`
+              ).join('');
+              originSelect.innerHTML = options;
+              destinationSelect.innerHTML = options;
+              originSelect.value = this.store.state.routing.originId;
+              destinationSelect.value = this.store.state.routing.destinationId;
+
+              const applyRoute = (notify) => {
+                if (originSelect.value === destinationSelect.value) {
+                  this.showToast('Choose a different origin and destination.', 'warning');
+                  this.renderRoutePlannerResult();
+                  return;
+                }
+                const routing = this.store.setRouteEndpoints(originSelect.value, destinationSelect.value);
+                this.renderRoutePlannerResult();
+                if (notify && routing) {
+                  this.showToast(
+                    routing.routeFound
+                      ? `Simulated route: ${routing.pathDistanceKm} km | ${routing.hazardSegmentsUsed} hazard segment(s).`
+                      : 'No simulated route found with the current road closures.',
+                    routing.routeFound ? 'success' : 'danger'
+                  );
+                }
+              };
+
+              originSelect.onchange = () => applyRoute(true);
+              destinationSelect.onchange = () => applyRoute(true);
+              if (calculateBtn) calculateBtn.onclick = () => applyRoute(true);
+
+              this.renderRoutePlannerResult();
+            }
+
+            renderRoutePlannerResult() {
+              const container = document.getElementById('route-planner-result');
+              if (!container) return;
+              const routing = this.store.state.routing;
+              const originSelect = document.getElementById('route-origin-select');
+              const destinationSelect = document.getElementById('route-destination-select');
+              if (originSelect && document.activeElement !== originSelect && routing.originId) originSelect.value = routing.originId;
+              if (destinationSelect && document.activeElement !== destinationSelect && routing.destinationId) destinationSelect.value = routing.destinationId;
+
+              if (routing.routeFound) {
+                const hazardColor = routing.hazardSegmentsUsed > 0 ? '#f59e0b' : '#33bfd6';
+                const hazardLabel = routing.hazardSegmentsUsed > 0 ? `ROUTE FOUND - ${routing.hazardSegmentsUsed} HAZARD` : 'ROUTE FOUND';
+                const hazardNames = routing.hazardSegments.map(segment => segment.name).join(' · ');
+                const connectorCount = routing.linksUsed ? routing.linksUsed.length : 0;
+                container.innerHTML = `
+                  <div class="route-result-head">
+                    <span class="route-status-tag" style="color:${hazardColor}; border-color:${hazardColor}; background:${hazardColor}22;">${hazardLabel}</span>
+                    <span class="route-result-distance">${routing.pathDistanceKm} km</span>
+                  </div>
+                  <div class="route-result-line"><span>ETA (simulated)</span><strong>~${routing.estimatedTimeMin} min</strong></div>
+                  <div class="route-result-line"><span>Road segments used</span><strong>${routing.roadsUsed.length}</strong></div>
+                  <div class="route-result-line"><span>Hazard segments on route</span><strong style="color:${hazardColor};">${routing.hazardSegmentsUsed}</strong></div>
+                  <div class="route-result-line"><span>Closed segments excluded</span><strong>${routing.closedRoadsExcluded}</strong></div>
+                  ${hazardNames ? `<div class="route-result-warning" title="${hazardNames}">Traverses: ${hazardNames}</div>` : ''}
+                  ${connectorCount > 0 ? `<div class="route-result-note">Dijkstra graph uses ${connectorCount} simulated local connector(s); the drawn route follows OpenStreetMap roads.</div>` : ''}
+                  ${routing.roadGeometryStatus === 'aligned'
+                    ? `<div class="route-result-note">Road geometry aligned to OpenStreetMap.</div>`
+                    : (routing.roadGeometryStatus === 'fallback'
+                      ? '<div class="route-result-warning">Road geometry fallback: live road alignment was unavailable.</div>'
+                      : '')}
+                  <div class="route-result-disclaimer">Simulation only - not a field-verified route or real-world safety assessment. Graph: ${routing.graph ? routing.graph.nodes : '—'} nodes / ${routing.graph ? routing.graph.activeEdges : '—'} active edges. Computed in ${routing.recalcTimeMs} ms.</div>
+                `;
+              } else {
+                container.innerHTML = `
+                  <div class="route-result-head">
+                    <span class="route-status-tag" style="color:#ef4444; border-color:#ef4444; background:rgba(239,68,68,0.18);">NO ROUTE FOUND</span>
+                  </div>
+                  <div class="route-result-error">${routing.pathStatus}</div>
+                  <div class="route-result-note">Reopen a road segment in the simulation controls or choose a different origin/destination.</div>
+                  <div class="route-result-disclaimer">Simulation only. Graph: ${routing.graph ? routing.graph.nodes : '—'} nodes / ${routing.graph ? routing.graph.activeEdges : '—'} active edges. Computed in ${routing.recalcTimeMs} ms.</div>
+                `;
+              }
+            }
+
+            renderFacilitiesList() {
+              const c = document.getElementById('map-facilities-list-body');
+              if (!c) return;
+              c.innerHTML = '';
+
+              document.querySelectorAll('#fac-filter-group .audit-filter-btn').forEach(b => {
+                b.onclick = () => {
+                  document.querySelectorAll('#fac-filter-group .audit-filter-btn').forEach(x => x.classList.remove('active'));
+                  b.classList.add('active');
+                  this.currentFacFilter = b.dataset.facFilter;
+                  this.renderFacilitiesList();
+                };
+              });
+
+              const list = this.store.state.facilities.filter(f => {
+                if (this.currentFacFilter === 'all') return true;
+                return f.type === this.currentFacFilter;
+              });
+
+              list.forEach(fac => {
+                const card = document.createElement('div');
+                card.className = 'facility-card-item';
+                const pct = fac.capacity > 0 ? Math.round((fac.currentOccupants / fac.capacity) * 100) : 0;
+                card.innerHTML = `
+                  <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:2px;">
+                    <span style="font-size:10px; font-weight:700; text-transform:uppercase; color:var(--green-bright); background:var(--green-pill-bg); padding:2px 6px; border-radius:4px;">${fac.category}</span>
+                    <span style="font-size:10px; font-weight:700; color:${fac.status === 'active' ? '#33bfd6' : (fac.status === 'warning' ? '#f59e0b' : '#93aab2')};">● ${fac.status.toUpperCase()}</span>
+                  </div>
+                  <h4 style="font-size:12px; font-weight:700; color:var(--text-white);">${fac.name}</h4>
+                  <div style="font-size:11px; color:var(--text-brown);">
+                    ${fac.capacity > 0 ? `Occupancy: <strong>${fac.currentOccupants} / ${fac.capacity} (${pct}%)</strong> • ` : ''}${fac.contact}
+                  </div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+                    <small style="color:var(--text-muted); font-size:10px;">${fac.amenities.slice(0, 2).join(', ')}</small>
+                    <button class="btn-action btn-map-view" data-focus-fac="${fac.id}" style="padding:2px 6px; font-size:10px;">📍 Focus Map</button>
+                  </div>
+                `;
+                card.querySelector(`[data-focus-fac="${fac.id}"]`).onclick = () => {
+                  if (this.map) {
+                    this.map.focusLocation(fac.coordinates[0], fac.coordinates[1], 16);
+                    this.showToast(`Centered map on: ${fac.name}`, 'info');
+                  }
+                };
+                c.appendChild(card);
+              });
+            }
+
+            initReportsPage() {
+              this.renderDecisions();
+              this.renderOutstandingRequests();
+              this.renderAuditPanel();
+
+              const autoMat = document.getElementById('btn-auto-match-all');
+              if (autoMat) {
+                autoMat.onclick = () => {
+                  const count = this.store.autoMatchAllRequests();
+                  this.showToast(count > 0 ? `${count} requests matched with nearby relief units!` : 'No pending requests to match.', 'success');
+                };
+              }
+
+              const expBtn = document.getElementById('btn-export-audit');
+              if (expBtn) {
+                expBtn.onclick = () => {
+                  const json = this.store.exportAuditLogJSON();
+                  const blob = new Blob([json], { type: 'application/json' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `NADITOWN_Audit_Report_${Date.now()}.json`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                  this.showToast("Official audit report downloaded (JSON).", 'success');
+                };
+              }
+            }
+
+            renderDecisions() {
+              const c = document.getElementById('decisions-list-container');
+              if (!c) return;
+              c.innerHTML = '';
+              const decs = this.store.state.decisions;
+              decs.forEach(dec => {
+                if (dec.status === 'dismissed') return;
+                const isApp = dec.status === 'approved';
+                const card = document.createElement('div');
+                card.className = `decision-card severity-${dec.severity} ${isApp ? 'status-approved' : ''}`;
+                card.innerHTML = `
+                  <div class="dec-header">
+                    <div>
+                      <span style="font-size:10px; color:var(--text-muted); font-weight:700;">${dec.id} &bull; ${dec.category}</span>
+                      <h4 class="dec-title">${dec.title}</h4>
+                    </div>
+                    <span class="dec-badge ${isApp ? 'badge-approved' : `badge-${dec.severity}`}">${isApp ? 'APPROVED' : dec.severity.toUpperCase()}</span>
+                  </div>
+                  <p class="dec-desc">${dec.description}</p>
+                  <div class="dec-impact">⚡ Impact Analysis: ${dec.impact}</div>
+                  <div class="dec-actions">
+                    ${!isApp ? `
+                      <button class="btn-action btn-approve" data-dec-approve="${dec.id}">✅ ${dec.suggestedAction}</button>
+                      <button class="btn-action btn-map-view" data-dec-view="${dec.id}">🧭 Map View</button>
+                      <button class="btn-action btn-dismiss" data-dec-dismiss="${dec.id}">Dismiss</button>
+                    ` : `
+                      <span style="font-size:11px; color:#33bfd6; font-weight:700;">✓ Authorized &amp; Active</span>
+                    `}
+                  </div>
+                `;
+                const app = card.querySelector(`[data-dec-approve="${dec.id}"]`);
+                if (app) app.onclick = () => {
+                  this.store.approveDecision(dec.id);
+                  this.showToast(`Action Authorized: ${dec.title}`, 'success');
+                };
+                const view = card.querySelector(`[data-dec-view="${dec.id}"]`);
+                if (view) view.onclick = () => {
+                  this.switchPage('page-map');
+                  if (this.map) {
+                    if (dec.actionType === 'reroute_guthrie') this.map.focusLocation(3.1755, 101.5020, 15);
+                    else if (dec.actionType === 'activate_pps_denai') this.map.focusLocation(3.1620, 101.5150, 16);
+                    else this.map.focusLocation(3.1835, 101.5080, 15);
+                  }
+                };
+                const dis = card.querySelector(`[data-dec-dismiss="${dec.id}"]`);
+                if (dis) dis.onclick = () => {
+                  this.store.dismissDecision(dec.id);
+                  this.showToast(`Dismissed ${dec.id}`, 'info');
+                };
+                c.appendChild(card);
+              });
+            }
+
+            renderOutstandingRequests() {
+              const c = document.getElementById('requests-list-container');
+              if (!c) return;
+              c.innerHTML = '';
+
+              document.querySelectorAll('#request-filter-group .audit-filter-btn').forEach(b => {
+                b.onclick = () => {
+                  document.querySelectorAll('#request-filter-group .audit-filter-btn').forEach(x => x.classList.remove('active'));
+                  b.classList.add('active');
+                  this.currentReqFilter = b.dataset.reqFilter;
+                  this.renderOutstandingRequests();
+                };
+              });
+
+              const list = this.store.state.requests.filter(r => {
+                if (this.currentReqFilter === 'all') return true;
+                if (this.currentReqFilter === 'pending') return r.status === 'pending';
+                if (this.currentReqFilter === 'matched') return r.status === 'matched';
+                if (this.currentReqFilter === 'dispatched') return r.status === 'dispatched';
+                return true;
+              });
+
+              if (list.length === 0) {
+                c.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:12px;">No requests in this view.</div>`;
+                return;
+              }
+
+              list.forEach(req => {
+                const card = document.createElement('div');
+                card.className = 'request-card';
+                const urgColor = req.urgency === 'critical' ? '#ef4444' : (req.urgency === 'high' ? '#b45309' : '#117c96');
+                const isPend = req.status === 'pending';
+                const isMat = req.status === 'matched';
+                let mClass = isPend ? 'match-pending' : (isMat ? 'match-assigned' : 'match-dispatched');
+                let mText = isPend ? '⚠️ Unassigned (Awaiting Assets)' : (isMat ? `✓ Matched: ${req.matchedResource} (ETA: ${req.eta})` : `🚀 Dispatched: ${req.matchedResource}`);
+
+                card.innerHTML = `
+                  <div class="req-header">
+                    <span class="req-id">${req.id}</span>
+                    <span class="req-urgency" style="background:${urgColor}22; color:${urgColor}; border:1px solid ${urgColor};">${req.urgency.toUpperCase()}</span>
+                  </div>
+                  <div>
+                    <div class="req-requester">${req.requester}</div>
+                    <div class="req-location">📍 ${req.location} &bull; ${req.timestamp}</div>
+                  </div>
+                  <div class="req-need">
+                    <strong>Assistance:</strong> ${req.need}<br>
+                    <small style="color:var(--text-brown);">Resource: <strong>${req.requiredResource}</strong></small>
+                  </div>
+                  <div class="req-match-box ${mClass}"><span>${mText}</span></div>
+                  <div style="display:flex; justify-content:flex-end; gap:6px; margin-top:4px;">
+                    <button class="btn-action btn-map-view" data-req-locate="${req.id}" style="padding:4px 8px; font-size:10px;">📍 Location</button>
+                    ${isPend ? `<button class="btn-action btn-approve" data-req-match="${req.id}" style="padding:4px 8px; font-size:10px;">⚡ Match Asset</button>` : ''}
+                    ${isMat ? `<button class="btn-action btn-approve" data-req-dispatch="${req.id}" style="padding:4px 8px; font-size:10px; background:#117c96;">🚀 Dispatch Asset</button>` : ''}
+                  </div>
+                `;
+                const loc = card.querySelector(`[data-req-locate="${req.id}"]`);
+                if (loc) loc.onclick = () => {
+                  this.switchPage('page-map');
+                  if (this.map && req.coordinates) {
+                    this.map.focusLocation(req.coordinates[0], req.coordinates[1], 16);
+                    this.showToast(`Centered map on: ${req.id}`, 'info');
+                  }
+                };
+                const matBtn = card.querySelector(`[data-req-match="${req.id}"]`);
+                if (matBtn) matBtn.onclick = () => {
+                  this.store.matchRequest(req.id);
+                  this.showToast(`Request ${req.id} matched!`, 'success');
+                };
+                const disBtn = card.querySelector(`[data-req-dispatch="${req.id}"]`);
+                if (disBtn) disBtn.onclick = () => {
+                  this.store.dispatchRequest(req.id);
+                  this.showToast(`Asset dispatched to ${req.id}!`, 'success');
+                };
+                c.appendChild(card);
+              });
+            }
+
+            renderAuditPanel() {
+              const c = document.getElementById('audit-log-stream');
+              if (!c) return;
+              c.innerHTML = '';
+
+              document.querySelectorAll('#audit-filter-group .audit-filter-btn').forEach(b => {
+                b.onclick = () => {
+                  document.querySelectorAll('#audit-filter-group .audit-filter-btn').forEach(x => x.classList.remove('active'));
+                  b.classList.add('active');
+                  this.currentLogFilter = b.dataset.logFilter;
+                  this.renderAuditPanel();
+                };
+              });
+
+              const logs = this.store.state.eventLogs.filter(l => this.currentLogFilter === 'ALL' || l.category === this.currentLogFilter);
+              logs.forEach(l => {
+                const item = document.createElement('div');
+                item.className = 'audit-entry';
+                item.innerHTML = `
+                  <div class="audit-entry-top">
+                    <span class="audit-cat">${l.category}</span>
+                    <span class="audit-time">${l.timestamp}</span>
+                  </div>
+                  <div style="color:#ffffff;">${l.message}</div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
+                    <span style="font-size:9px; color:var(--text-muted);">Source: ${l.author}</span>
+                    <span class="audit-hash">${l.auditHash}</span>
+                  </div>
+                `;
+                c.appendChild(item);
+              });
+
+              const vMatch = document.getElementById('vrf-match-ratio');
+              if (vMatch) {
+                const tot = this.store.state.requests.length;
+                const mat = this.store.state.requests.filter(r => ['matched', 'dispatched', 'resolved'].includes(r.status)).length;
+                vMatch.textContent = `${mat} / ${tot} (${Math.round((mat/tot)*100)}%)`;
+              }
+              const vApp = document.getElementById('vrf-approvals-count');
+              if (vApp) vApp.textContent = `${this.store.state.verification.totalApprovalsCount} Authorized`;
+              const vHash = document.getElementById('vrf-hash-val');
+              if (vHash) vHash.textContent = this.store.state.verification.systemAuditHash;
+            }
+
+            initCommunityPage() {
+              this.renderCommunityRequestsBoard();
+
+              document.querySelectorAll('#comm-filter-group .audit-filter-btn').forEach(b => {
+                b.onclick = () => {
+                  document.querySelectorAll('#comm-filter-group .audit-filter-btn').forEach(x => x.classList.remove('active'));
+                  b.classList.add('active');
+                  this.currentCommFilter = b.dataset.commFilter;
+                  this.renderCommunityRequestsBoard();
+                };
+              });
+
+              const subBtn = document.getElementById('comm-submit-btn');
+              if (subBtn) {
+                subBtn.onclick = (e) => {
+                  e.preventDefault();
+                  const name = document.getElementById('comm-inp-name').value.trim();
+                  const phone = document.getElementById('comm-inp-phone').value.trim();
+                  const loc = document.getElementById('comm-inp-location').value.trim();
+                  const need = document.getElementById('comm-inp-need').value.trim();
+                  const urg = document.getElementById('comm-inp-urgency').value;
+                  const res = document.getElementById('comm-inp-resource').value;
+
+                  if (!name || !loc || !need) {
+                    alert("Please provide Name, Location, and Assistance Need.");
+                    return;
+                  }
+
+                  const req = this.store.addCitizenRequest({
+                    requester: `${name} ${phone ? '(' + phone + ')' : ''}`,
+                    location: loc,
+                    need: need,
+                    urgency: urg,
+                    requiredResource: res,
+                    coordinates: [3.1800 + (Math.random() - 0.5) * 0.02, 101.5050 + (Math.random() - 0.5) * 0.02]
+                  });
+
+                  document.getElementById('comm-inp-name').value = '';
+                  document.getElementById('comm-inp-phone').value = '';
+                  document.getElementById('comm-inp-location').value = '';
+                  document.getElementById('comm-inp-need').value = '';
+
+                  this.renderCommunityRequestsBoard();
+                  this.showToast(`Emergency Call ${req.id} recorded in response stream!`, 'success');
+                };
+              }
+            }
+
+            renderCommunityRequestsBoard() {
+              const c = document.getElementById('community-requests-board');
+              if (!c) return;
+              c.innerHTML = '';
+
+              const list = this.store.state.requests.filter(r => {
+                if (this.currentCommFilter === 'all') return true;
+                if (this.currentCommFilter === 'pending') return r.status === 'pending';
+                if (this.currentCommFilter === 'matched') return r.status === 'matched';
+                if (this.currentCommFilter === 'dispatched') return r.status === 'dispatched';
+                return true;
+              });
+
+              if (list.length === 0) {
+                c.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted); font-size:12px;">No calls in this category.</div>`;
+                return;
+              }
+
+              list.forEach(req => {
+                const card = document.createElement('div');
+                card.className = 'community-request-tile';
+                let statusBadge = `<span class="badge-status-closed">⚠️ Pending Triage</span>`;
+                if (req.status === 'matched') statusBadge = `<span class="badge-status-hazard">✓ Asset Matched</span>`;
+                else if (req.status === 'dispatched') statusBadge = `<span class="badge-status-clear">🚀 Responders Dispatched</span>`;
+
+                card.innerHTML = `
+                  <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;">
+                    <div>
+                      <span style="font-family:monospace; font-weight:800; color:var(--green-bright); font-size:12px;">${req.id}</span>
+                      <span style="font-size:10px; color:var(--text-brown); margin-left:6px;">${req.timestamp}</span>
+                    </div>
+                    ${statusBadge}
+                  </div>
+                  <h4 style="font-size:13px; font-weight:700; color:var(--text-white); margin-bottom:4px;">${req.requester}</h4>
+                  <div style="font-size:11px; color:var(--text-brown); margin-bottom:6px;">📍 ${req.location}</div>
+                  <div style="background:var(--brown-surface); padding:8px; border-radius:6px; font-size:11px; margin-bottom:8px; border-left:3px solid var(--brown-amber);">
+                    <strong>Need:</strong> ${req.need}<br>
+                    <small style="color:var(--text-muted);">Required Asset: <strong>${req.requiredResource}</strong></small>
+                  </div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px;">
+                    <span style="color:var(--text-muted);">${req.matchedResource ? `Assigned: <strong style="color:var(--text-white);">${req.matchedResource}</strong>` : 'Awaiting Dispatch'}</span>
+                    ${req.status === 'pending' ? `
+                      <button class="btn-action btn-approve" data-comm-match="${req.id}" style="padding:4px 8px; font-size:10px;">
+                        ⚡ Match &amp; Dispatch
+                      </button>
+                    ` : `
+                      <span style="color:#33bfd6; font-weight:700; font-size:10px;">ETA: ${req.eta}</span>
+                    `}
+                  </div>
+                `;
+
+                const mBtn = card.querySelector(`[data-comm-match="${req.id}"]`);
+                if (mBtn) {
+                  mBtn.onclick = () => {
+                    this.store.matchRequest(req.id);
+                    this.showToast(`Request ${req.id} matched and assigned!`, 'success');
+                  };
+                }
+
+                c.appendChild(card);
+              });
+            }
+
+            setupSubscriptions() {
+              this.store.subscribe('roads_updated', () => {
+                this.updateKPIs();
+                this.renderRoadsDetailTable();
+                this.renderDecisions();
+                if (this.map) this.map.renderRoads();
+              });
+
+              this.store.subscribe('facility_updated', () => {
+                this.updateKPIs();
+                this.renderShelterDetailCards();
+                this.renderFacilitiesList();
+                if (this.map) this.map.renderFacilities();
+              });
+
+              this.store.subscribe('request_updated', () => {
+                this.updateKPIs();
+                this.renderRequestsSummaryCard();
+                this.renderOutstandingRequests();
+                this.renderCommunityRequestsBoard();
+                this.renderAuditPanel();
+              });
+
+              this.store.subscribe('request_added', () => {
+                this.updateKPIs();
+                this.renderRequestsSummaryCard();
+                this.renderOutstandingRequests();
+                this.renderCommunityRequestsBoard();
+                this.renderAuditPanel();
+              });
+
+              this.store.subscribe('decision_updated', () => {
+                this.renderDecisions();
+                this.renderAuditPanel();
+                this.updateKPIs();
+              });
+
+              this.store.subscribe('route_recalculated', () => {
+                this.updateKPIs();
+                this.renderRouteBenchmarkCard();
+                this.renderRoutePlannerResult();
+                if (this.map) this.map.renderDijkstraRoute();
+              });
+
+              this.store.subscribe('log_added', () => {
+                this.renderAuditPanel();
+                this.updateKPIs();
+              });
+            }
+
+            showToast(msg, type = 'info') {
+              const c = document.getElementById('toast-container');
+              if (!c) return;
+              const t = document.createElement('div');
+              t.className = 'toast';
+              if (type === 'success') t.style.borderLeftColor = 'var(--green-bright)';
+              else if (type === 'warning') t.style.borderLeftColor = 'var(--brown-amber)';
+              else if (type === 'danger') t.style.borderLeftColor = 'var(--accent-red)';
+              else t.style.borderLeftColor = 'var(--green-primary)';
+              t.innerHTML = `<span>${msg}</span>`;
+              c.appendChild(t);
+              setTimeout(() => {
+                t.style.opacity = '0';
+                t.style.transform = 'translateX(50px)';
+                setTimeout(() => t.remove(), 400);
+              }, 3500);
+            }
+          }
+
+          const localDashboard = new StandaloneDashboard(localMap, localStore);
+          localDashboard.init();
+
+          const chainStatusEl = document.getElementById('vrf-chain-status');
+          if (chainStatusEl) chainStatusEl.textContent = 'Fallback mode - SHA-256 audit unavailable';
+          const hashValEl = document.getElementById('vrf-hash-val');
+          if (hashValEl) hashValEl.textContent = '-- offline fallback --';
+
+          if (window.NADITOWN_COORDINATION_FALLBACK) {
+            window.NADITOWN_COORDINATION_FALLBACK.attach(localStore, localDashboard);
+            if (localMap && localMap.map) localMap.renderFacilities();
+            if (window.location.hash === '#coordination') {
+              localDashboard.switchPage('page-coordination', false);
+            }
+          }
+
+          window.naditown = {
+            map: localMap,
+            dashboard: localDashboard,
+            store: localStore
+          };
+
+          console.log("NADITOWN: Standalone engine successfully initialized.");
+        }, 120);
+      });
+    }
+  </script>
+
+  <!-- Left Navigation Drawer Toggle -->
+  <script>
+    (function () {
+      function initSidebar() {
+        const toggle = document.getElementById('sidebar-toggle');
+        const sidebar = document.getElementById('side-nav');
+        const backdrop = document.getElementById('side-nav-backdrop');
+        const closeBtn = document.getElementById('side-nav-close');
+        if (!toggle || !sidebar || !backdrop) return;
+
+        const setOpen = (open) => {
+          sidebar.classList.toggle('open', open);
+          backdrop.classList.toggle('open', open);
+          sidebar.setAttribute('aria-hidden', open ? 'false' : 'true');
+          toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+          if (open) {
+            const first = sidebar.querySelector('.nav-page-btn');
+            if (first) first.focus();
+          } else {
+            toggle.focus();
+          }
+        };
+
+        toggle.addEventListener('click', () => setOpen(!sidebar.classList.contains('open')));
+        if (closeBtn) closeBtn.addEventListener('click', () => setOpen(false));
+        backdrop.addEventListener('click', () => setOpen(false));
+        sidebar.querySelectorAll('.nav-page-btn').forEach(btn => {
+          btn.addEventListener('click', () => setOpen(false));
+        });
+        window.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && sidebar.classList.contains('open')) setOpen(false);
+        });
+
+        const clock = document.getElementById('side-nav-clock');
+        const tick = () => {
+          if (clock) clock.textContent = new Date().toLocaleTimeString('en-GB') + ' UTC+8';
+        };
+        tick();
+        setInterval(tick, 1000);
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSidebar);
+      } else {
+        initSidebar();
+      }
+    })();
+  </script>
 </body>
 </html>
